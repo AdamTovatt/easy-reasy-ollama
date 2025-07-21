@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Frontend\index.html" />
+    <None Remove="Resources\Frontend\script.js" />
+    <None Remove="Resources\Frontend\styles.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Frontend\index.html" />
+    <EmbeddedResource Include="Resources\Frontend\script.js" />
+    <EmbeddedResource Include="Resources\Frontend\styles.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyReasy" Version="1.0.0" />
+    <PackageReference Include="EasyReasy.EnvironmentVariables" Version="1.0.0" />
+    <PackageReference Include="OllamaSharp" Version="5.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyReasy.Auth\EasyReasy.Auth.csproj" />
+    <ProjectReference Include="..\EasyReasy.Ollama.Common\EasyReasy.Ollama.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Tenants\" />
+  </ItemGroup>
+
+</Project>

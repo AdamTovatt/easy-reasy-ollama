@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Ollama Chat</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <button id="theme-toggle" title="Toggle dark/light mode" style="position: absolute; top: 1.5rem; right: 2rem; z-index: 10; background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+    <span id="theme-icon">🌙</span>
+  </button>
+  <div id="login-section" class="cool-border">
+    <form id="login-form" class="login-form">
+      <h1>Ollama Chat</h1>
+      <label for="api-key">API Key:</label>
+      <input type="password" id="api-key" placeholder="Enter your API key" required>
+      <button type="submit">Login</button>
+      <div id="login-error" class="error-message" style="display: none;"></div>
+    </form>
+  </div>
+  <div id="chat-section" class="cool-border chat-container" style="display: none;">
+    <div class="chat-header">
+      <h2>Ollama Chat</h2>
+      <button id="logout-btn">Logout</button>
+    </div>
+    <div id="chat-output" class="chat-output"></div>
+    <form id="chat-form" class="chat-form">
+      <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <script src="/script.js"></script>
+  <script>
+    // Theme toggle logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const html = document.documentElement;
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+    // Set initial icon
+    setTheme(html.getAttribute('data-theme') || 'dark');
+  </script>
+</body>
+</html> 
