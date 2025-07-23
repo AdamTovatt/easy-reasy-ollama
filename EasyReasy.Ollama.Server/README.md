@@ -25,9 +25,13 @@ All requests to protected endpoints must be authenticated using a JWT (JSON Web 
 
    ```json
    {
-     "token": "<your-jwt-token>"
+     "token": "<your-jwt-token>",
+     "expiresAt": "2024-06-10T12:34:56Z"
    }
    ```
+
+   - `token`: The JWT to use for authentication
+   - `expiresAt`: The expiration date/time of the token (ISO 8601, UTC)
 
 2. **Use the JWT in Requests**
 
