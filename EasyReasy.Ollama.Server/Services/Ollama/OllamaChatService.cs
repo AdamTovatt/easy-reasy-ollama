@@ -3,13 +3,14 @@ using System.Runtime.CompilerServices;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
-    public class OllamaChatService : OllamaServiceBase, IOllamaChatService
+    public class OllamaChatService : OllamaService, IOllamaChatService
     {
-        private OllamaChatService(string url, string model, bool keepModelLoaded) : base(url, model, keepModelLoaded) { }
+        private OllamaChatService(string url, string model, bool keepModelLoaded, ILogger<IOllamaService> logger)
+            : base(url, model, keepModelLoaded, logger) { }
 
-        public static OllamaChatService Create(string url, string model, bool keepModelLoaded = true)
+        public static OllamaChatService Create(string url, string model, ILogger<IOllamaService> logger, bool keepModelLoaded = true)
         {
-            return new OllamaChatService(url, model, keepModelLoaded);
+            return new OllamaChatService(url, model, keepModelLoaded, logger);
         }
 
         public async IAsyncEnumerable<string> GetResponseAsync(string text, [EnumeratorCancellation] CancellationToken cancellationToken = default)

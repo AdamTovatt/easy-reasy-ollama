@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EasyReasy" Version="1.0.0" />
+    <PackageReference Include="EasyReasy.EnvironmentVariables" Version="1.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />
     <PackageReference Include="MSTest.TestFramework" Version="3.0.4" />
@@ -19,6 +21,10 @@
   <ItemGroup>
     <ProjectReference Include="..\EasyReasy.Ollama.Common\EasyReasy.Ollama.Common.csproj" />
     <ProjectReference Include="..\EasyReasy.Ollama.Server\EasyReasy.Ollama.Server.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestUtilities\" />
   </ItemGroup>
 
 </Project>

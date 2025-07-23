@@ -24,14 +24,24 @@ namespace EasyReasy.Ollama.Server
             ResourceManager resourceManager = await ResourceManager.CreateInstanceAsync();
             builder.Services.AddSingleton(resourceManager);
 
-            // Register IOllamaService and OllamaService
+            // Register IOllamaChatService and OllamaChatService
             string ollamaUrl = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.OllamaUrl);
             string ollamaModel = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.OllamaModelName);
-            IOllamaService ollamaService = OllamaService.Create(ollamaUrl, ollamaModel);
-            builder.Services.AddSingleton(ollamaService);
+
+            builder.Services.AddSingleton<IOllamaChatService>(provider =>
+            {
+                ILogger<IOllamaService> logger = provider.GetRequiredService<ILogger<IOllamaService>>();
+                return OllamaChatService.Create(ollamaUrl, ollamaModel, logger);
+            });
+
+            builder.Services.AddSingleton<IOllamaEmbeddingService>(provider =>
+            {
+                ILogger<IOllamaService> logger = provider.GetRequiredService<ILogger<IOllamaService>>();
+                return OllamaEmbeddingService.Create(ollamaUrl, ollamaModel, logger);
+            });
 
             // Register TenantService
-            builder.Services.AddSingleton<ITenantService, TenantService>();
+            builder.Services.AddSingleton<ITenantService, EnvironmentVariablesTenantService>();
 
             // Add JWT authentication and authorization
             string jwtSecret = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.JwtSigningSecret);

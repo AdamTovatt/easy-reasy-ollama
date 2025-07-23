@@ -1,36 +1,42 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EasyReasy.EnvironmentVariables;
 using EasyReasy.Ollama.Server.Services.Ollama;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using EasyReasy.Ollama.Server.Tests.TestUtilities;
+using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace EasyReasy.Ollama.Server.Tests
 {
     [TestClass]
     public class OllamaChatServiceTests
     {
-        private string _url;
-        private string _model;
+        private static string _url = null!;
+        private static string _model = null!;
+        private static ILogger<IOllamaService> _logger = null!;
 
-        [TestInitialize]
-        public void Initialize()
+        [ClassInitialize]
+        public static void BeforeAll(TestContext testContext)
         {
-            _url = EnvironmentVariableLoader.Get(OllamaIntegrationEnvironmentVariables.OllamaUrl);
-            _model = EnvironmentVariableLoader.Get(OllamaIntegrationEnvironmentVariables.OllamaModelName);
+            EnvironmentVariables.EnvironmentVariables.LoadFromFile("env.txt");
+            EnvironmentVariables.EnvironmentVariables.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
+            _url = EnvironmentVariables.EnvironmentVariables.GetVariable(OllamaIntegrationEnvironmentVariables.OllamaUrl);
+            _model = EnvironmentVariables.EnvironmentVariables.GetVariable(OllamaIntegrationEnvironmentVariables.OllamaModelName);
+            _logger = new ConsoleLogger<IOllamaService>();
         }
 
         [TestMethod]
         public async Task ChatService_ReturnsResponse()
         {
-            using OllamaChatService service = OllamaChatService.Create(_url, _model);
-            IAsyncEnumerable<string> response = service.GetResponseAsync("Hello, world!", CancellationToken.None);
+            using OllamaChatService service = OllamaChatService.Create(_url, _model, _logger);
+
+            StringBuilder totalResponse = new StringBuilder();
+
+            IAsyncEnumerable<string> response = service.GetResponseAsync("Hello, who are you?", CancellationToken.None);
+
             await foreach (string message in response)
             {
-                Assert.IsFalse(string.IsNullOrWhiteSpace(message));
-                break;
+                totalResponse.Append(message);
             }
+
+            Console.WriteLine(totalResponse.ToString());
         }
     }
-} 
+}

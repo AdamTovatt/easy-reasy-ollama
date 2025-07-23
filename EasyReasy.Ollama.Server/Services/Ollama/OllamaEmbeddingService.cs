@@ -2,13 +2,14 @@ using OllamaSharp.Models;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
-    public class OllamaEmbeddingService : OllamaServiceBase, IOllamaEmbeddingService
+    public class OllamaEmbeddingService : OllamaService, IOllamaEmbeddingService
     {
-        private OllamaEmbeddingService(string url, string model, bool keepModelLoaded) : base(url, model, keepModelLoaded) { }
+        private OllamaEmbeddingService(string url, string model, bool keepModelLoaded, ILogger<IOllamaService> logger)
+            : base(url, model, keepModelLoaded, logger) { }
 
-        public static OllamaEmbeddingService Create(string url, string model, bool keepModelLoaded = true)
+        public static OllamaEmbeddingService Create(string url, string model, ILogger<IOllamaService> logger, bool keepModelLoaded = true)
         {
-            return new OllamaEmbeddingService(url, model, keepModelLoaded);
+            return new OllamaEmbeddingService(url, model, keepModelLoaded, logger);
         }
 
         public async Task<float[]> GetEmbeddingsAsync(string text, CancellationToken cancellationToken = default)

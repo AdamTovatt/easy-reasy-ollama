@@ -6,14 +6,14 @@ namespace EasyReasy.Ollama.Server.Services.Tenants
     /// <summary>
     /// Tenant service that loads tenant info from environment variables at startup.
     /// </summary>
-    public class TenantService : ITenantService
+    public class EnvironmentVariablesTenantService : ITenantService
     {
         private readonly ConcurrentDictionary<string, TenantInfo> _apiKeyToTenant = new ConcurrentDictionary<string, TenantInfo>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TenantService"/> class.
+        /// Initializes a new instance of the <see cref="EnvironmentVariablesTenantService"/> class.
         /// </summary>
-        public TenantService()
+        public EnvironmentVariablesTenantService()
         {
             int index = 1;
 

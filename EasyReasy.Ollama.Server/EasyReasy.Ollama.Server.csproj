@@ -31,8 +31,4 @@
     <ProjectReference Include="..\EasyReasy.Ollama.Common\EasyReasy.Ollama.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Tenants\" />
-  </ItemGroup>
-
 </Project>

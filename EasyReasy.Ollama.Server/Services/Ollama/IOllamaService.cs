@@ -2,7 +2,8 @@
 {
     public interface IOllamaService
     {
-        IAsyncEnumerable<string> GetResponseAsync(string text, CancellationToken cancellationToken = default);
-        Task<float[]> GetEmbeddingsAsync(string text, CancellationToken cancellationToken = default);
+        Task<List<string>> GetAvailableModelsAsync(CancellationToken cancellationToken = default);
+        Task PullModelAsync(string modelName, CancellationToken cancellationToken = default);
+        Task<bool> IsModelAvailableAsync(string modelName, CancellationToken cancellationToken = default);
     }
 }
