@@ -1,3 +1,4 @@
+using EasyReasy.EnvironmentVariables;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Tests.TestUtilities;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,11 @@ namespace EasyReasy.Ollama.Server.Tests
         [ClassInitialize]
         public static void BeforeAll(TestContext testContext)
         {
-            EnvironmentVariables.EnvironmentVariables.LoadFromFile("env.txt");
-            EnvironmentVariables.EnvironmentVariables.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
+            EnvironmentVariableHelper.LoadVariablesFromFile("env.txt");
+            EnvironmentVariableHelper.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
 
-            _url = EnvironmentVariables.EnvironmentVariables.GetVariable(OllamaIntegrationEnvironmentVariables.OllamaUrl);
-            _model = EnvironmentVariables.EnvironmentVariables.GetVariable(OllamaIntegrationEnvironmentVariables.OllamaModelName);
+            _url = OllamaIntegrationEnvironmentVariables.OllamaUrl.GetValue();
+            _model = OllamaIntegrationEnvironmentVariables.OllamaModelName.GetValue();
             _logger = new ConsoleLogger<IOllamaService>();
         }
 

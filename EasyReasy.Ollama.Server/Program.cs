@@ -1,4 +1,5 @@
 using EasyReasy.Auth;
+using EasyReasy.EnvironmentVariables;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Services.Tenants;
 
@@ -13,7 +14,7 @@ namespace EasyReasy.Ollama.Server
             // Add services to the container.
 
             // Validate environment variables at startup
-            EnvironmentVariables.EnvironmentVariables.ValidateVariableNamesIn(typeof(EnvironmentVariable));
+            EnvironmentVariableHelper.ValidateVariableNamesIn(typeof(EnvironmentVariables));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,8 +26,8 @@ namespace EasyReasy.Ollama.Server
             builder.Services.AddSingleton(resourceManager);
 
             // Register IOllamaChatService and OllamaChatService
-            string ollamaUrl = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.OllamaUrl);
-            string ollamaModel = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.OllamaModelName);
+            string ollamaUrl = EnvironmentVariables.OllamaUrl.GetValue();
+            string ollamaModel = EnvironmentVariables.OllamaModelName.GetValue();
 
             builder.Services.AddSingleton<IOllamaChatService>(provider =>
             {
@@ -44,7 +45,7 @@ namespace EasyReasy.Ollama.Server
             builder.Services.AddSingleton<ITenantService, EnvironmentVariablesTenantService>();
 
             // Add JWT authentication and authorization
-            string jwtSecret = EnvironmentVariables.EnvironmentVariables.GetVariable(EnvironmentVariable.JwtSigningSecret);
+            string jwtSecret = EnvironmentVariables.JwtSigningSecret.GetValue();
             builder.Services.AddEasyReasyAuth(jwtSecret, issuer: "OllamaServer");
 
             WebApplication app = builder.Build();
