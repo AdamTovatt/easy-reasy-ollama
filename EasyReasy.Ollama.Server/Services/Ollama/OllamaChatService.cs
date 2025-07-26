@@ -1,6 +1,10 @@
 using OllamaSharp.Models.Chat;
 using System.Runtime.CompilerServices;
 using EasyReasy.Ollama.Server.Providers;
+using EasyReasy.Ollama.Server.Extensions;
+using EasyReasy.Ollama.Common;
+using Message = EasyReasy.Ollama.Common.Message;
+using ChatRole = EasyReasy.Ollama.Common.ChatRole;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -40,26 +44,75 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <param name="text">The user input text to send to the model.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An async stream of response strings from the model.</returns>
-        public async IAsyncEnumerable<string> GetResponseAsync(string text, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> GetResponseAsync(
+            string text,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            ChatRequest chatRequest = new ChatRequest();
+            List<Message> messages = new List<Message>
+            {
+                new Message(ChatRole.User, text)
+            };
+
+            await foreach (string response in GetResponseAsync(messages, cancellationToken))
+            {
+                yield return response;
+            }
+        }
+
+        /// <summary>
+        /// Gets a streaming chat response for the given list of messages.
+        /// </summary>
+        /// <param name="messages">The list of messages to send to the model.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>An async stream of response strings from the model.</returns>
+        public async IAsyncEnumerable<string> GetResponseAsync(
+            List<Message> messages,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            await foreach (string response in GetResponseAsync(messages, null, cancellationToken))
+            {
+                yield return response;
+            }
+        }
+
+        /// <summary>
+        /// Gets a streaming chat response for the given list of messages and tool calls.
+        /// </summary>
+        /// <param name="messages">The list of messages to send to the model.</param>
+        /// <param name="toolCalls">The list of tool calls to include in the request.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>An async stream of response strings from the model.</returns>
+        public async IAsyncEnumerable<string> GetResponseAsync(
+            List<Message> messages,
+            IEnumerable<ToolCall>? toolCalls,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (messages == null || !messages.Any())
+            {
+                throw new ArgumentException("Messages cannot be null or empty", nameof(messages));
+            }
+
+            List<OllamaSharp.Models.Chat.Message> ollamaMessages = messages.ToOllamaSharp().ToList();
+
+            ChatRequest chatRequest = new ChatRequest
+            {
+                Messages = ollamaMessages
+            };
 
             if (_keepModelLoaded)
                 chatRequest.KeepAlive = _negativeKeepAliveValue;
-
-            List<Message> messages = new List<Message>();
-            messages.Add(new Message(ChatRole.User, text));
-            chatRequest.Messages = messages;
 
             IAsyncEnumerable<ChatResponseStream?> result = _client.ChatAsync(chatRequest, cancellationToken);
 
             await foreach (ChatResponseStream? message in result.ConfigureAwait(false))
             {
-                if (message == null)
+                if (message == null || message.Message.Content == null)
                     continue;
 
-                yield return message.Message.Content ?? "";
+                yield return message.Message.Content;
             }
         }
+
+
     }
 }
