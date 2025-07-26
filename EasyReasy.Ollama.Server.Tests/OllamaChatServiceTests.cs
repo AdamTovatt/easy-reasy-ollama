@@ -1,4 +1,5 @@
 using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Server.Providers;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Tests.TestUtilities;
 using Microsoft.Extensions.Logging;
@@ -9,28 +10,29 @@ namespace EasyReasy.Ollama.Server.Tests
     [TestClass]
     public class OllamaChatServiceTests
     {
+        private const string _defaultChatModel = "gemma3";
+
         private static string _url = null!;
-        private static string _model = null!;
-        private static ILogger<IOllamaService> _logger = null!;
+        private static IAllowedModelsProvider _allowedModelsProvider = null!;
+        private static ILogger<OllamaChatService> _logger = null!;
+        private static OllamaChatService _chatService = null!;
 
         [ClassInitialize]
         public static void BeforeAll(TestContext testContext)
         {
-            EnvironmentVariableHelper.LoadVariablesFromFile("env.txt");
-            EnvironmentVariableHelper.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
             _url = OllamaIntegrationEnvironmentVariables.OllamaUrl.GetValue();
-            _model = OllamaIntegrationEnvironmentVariables.OllamaModelName.GetValue();
-            _logger = new ConsoleLogger<IOllamaService>();
+            _allowedModelsProvider = new EnvironmentVariablesAllowedModelsProvider();
+            _logger = new ConsoleLogger<OllamaChatService>();
+
+            _chatService = OllamaChatService.Create(_url, _defaultChatModel, _logger, _allowedModelsProvider);
         }
 
         [TestMethod]
         public async Task ChatService_ReturnsResponse()
         {
-            using OllamaChatService service = OllamaChatService.Create(_url, _model, _logger);
-
             StringBuilder totalResponse = new StringBuilder();
 
-            IAsyncEnumerable<string> response = service.GetResponseAsync("Hello, who are you?", CancellationToken.None);
+            IAsyncEnumerable<string> response = _chatService.GetResponseAsync("Hello, who are you?", CancellationToken.None);
 
             await foreach (string message in response)
             {

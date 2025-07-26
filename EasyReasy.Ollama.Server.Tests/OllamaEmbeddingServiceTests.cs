@@ -1,37 +1,34 @@
-using EasyReasy.EnvironmentVariables;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Tests.TestUtilities;
 using Microsoft.Extensions.Logging;
+using EasyReasy.Ollama.Server.Providers;
+using EasyReasy.EnvironmentVariables;
 
 namespace EasyReasy.Ollama.Server.Tests
 {
     [TestClass]
     public class OllamaEmbeddingServiceTests
     {
+        private const string _defaultEmbeddingModel = "nomic-embed-text";
+
         private static string _url = null!;
         private static string _model = null!;
-        private static ILogger<IOllamaService> _logger = null!;
+        private static ILogger<OllamaEmbeddingService> _logger = null!;
+        private static IAllowedModelsProvider _allowedModelsProvider = null!;
 
         [ClassInitialize]
         public static void BeforeAll(TestContext testContext)
         {
-            EnvironmentVariableHelper.LoadVariablesFromFile("env.txt");
-            EnvironmentVariableHelper.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
-
             _url = OllamaIntegrationEnvironmentVariables.OllamaUrl.GetValue();
-            _model = OllamaIntegrationEnvironmentVariables.OllamaModelName.GetValue();
-            _logger = new ConsoleLogger<IOllamaService>();
+            _model = _defaultEmbeddingModel;
+            _logger = new ConsoleLogger<OllamaEmbeddingService>();
+            _allowedModelsProvider = new EnvironmentVariablesAllowedModelsProvider();
         }
 
         [TestMethod]
         public async Task EmbeddingService_ReturnsEmbeddings()
         {
-            using OllamaEmbeddingService service = OllamaEmbeddingService.Create(_url, _model, _logger);
-
-            if (!await service.IsModelAvailableAsync(_model))
-            {
-                await service.PullModelAsync(_model);
-            }
+            using OllamaEmbeddingService service = OllamaEmbeddingService.Create(_url, _model, _logger, _allowedModelsProvider);
 
             float[] embedding = await service.GetEmbeddingsAsync("Hello, world!", CancellationToken.None);
             Assert.IsNotNull(embedding);

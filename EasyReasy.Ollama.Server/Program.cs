@@ -2,6 +2,7 @@ using EasyReasy.Auth;
 using EasyReasy.EnvironmentVariables;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Services.Tenants;
+using EasyReasy.Ollama.Server.Providers;
 
 namespace EasyReasy.Ollama.Server
 {
@@ -25,20 +26,17 @@ namespace EasyReasy.Ollama.Server
             ResourceManager resourceManager = await ResourceManager.CreateInstanceAsync();
             builder.Services.AddSingleton(resourceManager);
 
-            // Register IOllamaChatService and OllamaChatService
+            // Register IAllowedModelsProvider
+            builder.Services.AddSingleton<IAllowedModelsProvider, EnvironmentVariablesAllowedModelsProvider>();
+
+            // Register IOllamaServiceFactory with concrete loggers
             string ollamaUrl = EnvironmentVariables.OllamaUrl.GetValue();
-            string ollamaModel = EnvironmentVariables.OllamaModelName.GetValue();
-
-            builder.Services.AddSingleton<IOllamaChatService>(provider =>
+            builder.Services.AddSingleton<IOllamaServiceFactory>(provider =>
             {
-                ILogger<IOllamaService> logger = provider.GetRequiredService<ILogger<IOllamaService>>();
-                return OllamaChatService.Create(ollamaUrl, ollamaModel, logger);
-            });
-
-            builder.Services.AddSingleton<IOllamaEmbeddingService>(provider =>
-            {
-                ILogger<IOllamaService> logger = provider.GetRequiredService<ILogger<IOllamaService>>();
-                return OllamaEmbeddingService.Create(ollamaUrl, ollamaModel, logger);
+                ILogger<OllamaChatService> chatLogger = provider.GetRequiredService<ILogger<OllamaChatService>>();
+                ILogger<OllamaEmbeddingService> embeddingLogger = provider.GetRequiredService<ILogger<OllamaEmbeddingService>>();
+                IAllowedModelsProvider allowedModelsProvider = provider.GetRequiredService<IAllowedModelsProvider>();
+                return new OllamaServiceFactory(ollamaUrl, chatLogger, embeddingLogger, allowedModelsProvider);
             });
 
             // Register TenantService
