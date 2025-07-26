@@ -53,7 +53,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
             IAsyncEnumerable<ChatResponseStream?> result = _client.ChatAsync(chatRequest, cancellationToken);
 
-            await foreach (ChatResponseStream? message in result)
+            await foreach (ChatResponseStream? message in result.ConfigureAwait(false))
             {
                 if (message == null)
                     continue;
