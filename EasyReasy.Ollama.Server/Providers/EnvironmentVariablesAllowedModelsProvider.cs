@@ -1,4 +1,5 @@
 using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Server.Helpers;
 using System.Collections.Concurrent;
 
 namespace EasyReasy.Ollama.Server.Providers
@@ -58,7 +59,7 @@ namespace EasyReasy.Ollama.Server.Providers
         private bool CheckIfModelAllowed(string modelName)
         {
             IEnumerable<string> allowedModels = GetAllowedModels();
-            return allowedModels.Any(model => string.Equals(model, modelName, StringComparison.OrdinalIgnoreCase));
+            return ModelNameMatcher.IsModelFound(modelName, allowedModels);
         }
     }
 } 

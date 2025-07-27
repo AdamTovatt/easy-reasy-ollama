@@ -5,6 +5,7 @@ using EasyReasy.Ollama.Server.Extensions;
 using EasyReasy.Ollama.Common;
 using Message = EasyReasy.Ollama.Common.Message;
 using ChatRole = EasyReasy.Ollama.Common.ChatRole;
+using OllamaSharp;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -44,19 +45,16 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <param name="text">The user input text to send to the model.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An async stream of response strings from the model.</returns>
-        public async IAsyncEnumerable<string> GetResponseAsync(
+        public IAsyncEnumerable<ChatResponsePart> GetResponseAsync(
             string text,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
             List<Message> messages = new List<Message>
             {
                 new Message(ChatRole.User, text)
             };
 
-            await foreach (string response in GetResponseAsync(messages, cancellationToken))
-            {
-                yield return response;
-            }
+            return GetResponseAsync(messages, cancellationToken);
         }
 
         /// <summary>
@@ -65,26 +63,23 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <param name="messages">The list of messages to send to the model.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An async stream of response strings from the model.</returns>
-        public async IAsyncEnumerable<string> GetResponseAsync(
+        public IAsyncEnumerable<ChatResponsePart> GetResponseAsync(
             List<Message> messages,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
-            await foreach (string response in GetResponseAsync(messages, null, cancellationToken))
-            {
-                yield return response;
-            }
+            return GetResponseAsync(messages, null, cancellationToken);
         }
 
         /// <summary>
         /// Gets a streaming chat response for the given list of messages and tool calls.
         /// </summary>
         /// <param name="messages">The list of messages to send to the model.</param>
-        /// <param name="toolCalls">The list of tool calls to include in the request.</param>
+        /// <param name="toolDefinitions">The list of tool definitions to include in the request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An async stream of response strings from the model.</returns>
-        public async IAsyncEnumerable<string> GetResponseAsync(
+        public async IAsyncEnumerable<ChatResponsePart> GetResponseAsync(
             List<Message> messages,
-            IEnumerable<ToolCall>? toolCalls,
+            IEnumerable<ToolDefinition>? toolDefinitions,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (messages == null || !messages.Any())
@@ -92,11 +87,12 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
                 throw new ArgumentException("Messages cannot be null or empty", nameof(messages));
             }
 
-            List<OllamaSharp.Models.Chat.Message> ollamaMessages = messages.ToOllamaSharp().ToList();
+            List<OllamaSharp.Models.Chat.Message> ollamaMessages = messages.ToOllamaSharp();
 
             ChatRequest chatRequest = new ChatRequest
             {
-                Messages = ollamaMessages
+                Messages = ollamaMessages,
+                Tools = toolDefinitions?.ToOllamaTools(),
             };
 
             if (_keepModelLoaded)
@@ -106,13 +102,18 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
             await foreach (ChatResponseStream? message in result.ConfigureAwait(false))
             {
-                if (message == null || message.Message.Content == null)
+                if (message == null)
                     continue;
 
-                yield return message.Message.Content;
+                if (message.Message.ToolCalls != null && message.Message.ToolCalls.Any())
+                {
+                    yield return new ChatResponsePart(message.Message.ToolCalls.ToCommon());
+                }
+                else if (message.Message.Content != null)
+                {
+                    yield return new ChatResponsePart(message.Message.Content);
+                }
             }
         }
-
-
     }
 }

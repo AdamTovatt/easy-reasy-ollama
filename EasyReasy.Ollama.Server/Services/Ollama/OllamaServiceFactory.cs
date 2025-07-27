@@ -1,3 +1,4 @@
+using EasyReasy.Ollama.Server.Helpers;
 using EasyReasy.Ollama.Server.Providers;
 using System.Collections.Concurrent;
 using OllamaSharp;
@@ -143,26 +144,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         public async Task<bool> IsModelAvailableAsync(string modelName, CancellationToken cancellationToken = default)
         {
             List<string> availableModels = await GetAvailableModelsAsync(cancellationToken).ConfigureAwait(false);
-
-            // Check if the modelName contains a version (e.g., ":latest" or ":[version]")
-            int versionSeparatorIndex = modelName.IndexOf(':');
-            if (versionSeparatorIndex > -1)
-            {
-                // Version specified, must match exactly
-                foreach (string availableModel in availableModels)
-                    if (string.Equals(availableModel, modelName, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                return false;
-            }
-            else
-            {
-                // No version specified, match any model that starts with modelName + ":"
-                string prefix = modelName + ":";
-                foreach (string availableModel in availableModels)
-                    if (availableModel.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                return false;
-            }
+            return ModelNameMatcher.IsModelFound(modelName, availableModels);
         }
 
         /// <summary>

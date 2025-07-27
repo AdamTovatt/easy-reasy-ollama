@@ -1,3 +1,4 @@
+using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,9 +62,9 @@ namespace EasyReasy.Ollama.Server.Controllers
         public async Task StreamSse(string text, CancellationToken cancellationToken)
         {
             Response.ContentType = "text/event-stream";
-            await foreach (string chunk in _ollamaChatService.GetResponseAsync(text, cancellationToken))
+            await foreach (ChatResponsePart responsePart in _ollamaChatService.GetResponseAsync(text, cancellationToken))
             {
-                await Response.WriteAsync($"data: {chunk}\n\n", cancellationToken);
+                await Response.WriteAsync($"data: {responsePart}\n\n", cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);
             }
         }

@@ -1,3 +1,5 @@
+using EasyReasy.Ollama.Common;
+
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
     /// <summary>
@@ -11,6 +13,6 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <param name="text">The user input text to send to the model.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An async stream of response strings from the model.</returns>
-        IAsyncEnumerable<string> GetResponseAsync(string text, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<ChatResponsePart> GetResponseAsync(string text, CancellationToken cancellationToken = default);
     }
 }

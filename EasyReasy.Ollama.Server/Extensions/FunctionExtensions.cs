@@ -27,9 +27,9 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="function">The OllamaSharp function to convert.</param>
         /// <returns>The converted function.</returns>
-        public static Function ToCommon(this Function function)
+        public static Common.Function ToCommon(this Function function)
         {
-            return new Function
+            return new Common.Function
             {
                 Index = function.Index,
                 Name = function.Name,
@@ -42,7 +42,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="functions">The functions to convert.</param>
         /// <returns>The converted OllamaSharp functions.</returns>
-        public static IEnumerable<Function> ToOllamaSharp(this IEnumerable<Function> functions)
+        public static IEnumerable<Function> ToOllamaSharp(this IEnumerable<Common.Function> functions)
         {
             return functions.Select(f => f.ToOllamaSharp());
         }
@@ -52,7 +52,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="functions">The OllamaSharp functions to convert.</param>
         /// <returns>The converted functions.</returns>
-        public static IEnumerable<Function> ToCommon(this IEnumerable<Function> functions)
+        public static IEnumerable<Common.Function> ToCommon(this IEnumerable<Function> functions)
         {
             return functions.Select(f => f.ToCommon());
         }
@@ -62,7 +62,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="functions">The functions to convert.</param>
         /// <returns>The converted OllamaSharp functions.</returns>
-        public static List<Function> ToOllamaSharp(this List<Function> functions)
+        public static List<Function> ToOllamaSharp(this List<Common.Function> functions)
         {
             return functions.Select(f => f.ToOllamaSharp()).ToList();
         }
@@ -72,7 +72,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="functions">The OllamaSharp functions to convert.</param>
         /// <returns>The converted functions.</returns>
-        public static List<Function> ToCommon(this List<Function> functions)
+        public static List<Common.Function> ToCommon(this List<Function> functions)
         {
             return functions.Select(f => f.ToCommon()).ToList();
         }

@@ -12,7 +12,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCall">The tool call to convert.</param>
         /// <returns>The converted OllamaSharp tool call.</returns>
-        public static ToolCall ToOllamaSharp(this ToolCall toolCall)
+        public static ToolCall ToOllamaSharp(this Common.ToolCall toolCall)
         {
             return new ToolCall
             {
@@ -25,9 +25,9 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCall">The OllamaSharp tool call to convert.</param>
         /// <returns>The converted tool call.</returns>
-        public static ToolCall ToCommon(this ToolCall toolCall)
+        public static Common.ToolCall ToCommon(this ToolCall toolCall)
         {
-            return new ToolCall
+            return new Common.ToolCall
             {
                 Function = toolCall.Function?.ToCommon()
             };
@@ -38,7 +38,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCalls">The tool calls to convert.</param>
         /// <returns>The converted OllamaSharp tool calls.</returns>
-        public static IEnumerable<ToolCall> ToOllamaSharp(this IEnumerable<ToolCall> toolCalls)
+        public static IEnumerable<ToolCall> ToOllamaSharp(this IEnumerable<Common.ToolCall> toolCalls)
         {
             return toolCalls.Select(tc => tc.ToOllamaSharp());
         }
@@ -48,7 +48,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCalls">The OllamaSharp tool calls to convert.</param>
         /// <returns>The converted tool calls.</returns>
-        public static IEnumerable<ToolCall> ToCommon(this IEnumerable<ToolCall> toolCalls)
+        public static IEnumerable<Common.ToolCall> ToCommon(this IEnumerable<ToolCall> toolCalls)
         {
             return toolCalls.Select(tc => tc.ToCommon());
         }
@@ -58,7 +58,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCalls">The tool calls to convert.</param>
         /// <returns>The converted OllamaSharp tool calls.</returns>
-        public static List<ToolCall> ToOllamaSharp(this List<ToolCall> toolCalls)
+        public static List<ToolCall> ToOllamaSharp(this List<Common.ToolCall> toolCalls)
         {
             return toolCalls.Select(tc => tc.ToOllamaSharp()).ToList();
         }
@@ -68,7 +68,7 @@ namespace EasyReasy.Ollama.Server.Extensions
         /// </summary>
         /// <param name="toolCalls">The OllamaSharp tool calls to convert.</param>
         /// <returns>The converted tool calls.</returns>
-        public static List<ToolCall> ToCommon(this List<ToolCall> toolCalls)
+        public static List<Common.ToolCall> ToCommon(this List<ToolCall> toolCalls)
         {
             return toolCalls.Select(tc => tc.ToCommon()).ToList();
         }
