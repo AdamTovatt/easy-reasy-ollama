@@ -1,3 +1,4 @@
+using EasyReasy.Auth;
 using EasyReasy.Ollama.Common;
 
 namespace EasyReasy.Ollama.Client
