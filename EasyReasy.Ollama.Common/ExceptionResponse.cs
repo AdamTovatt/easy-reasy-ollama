@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 
 namespace EasyReasy.Ollama.Common
 {
@@ -50,6 +51,39 @@ namespace EasyReasy.Ollama.Common
                 return exceptionResponse;
 
             return new ExceptionResponse(typeof(Exception), $"Could not deserialize original exception response from json: {json}");
+        }
+
+        /// <summary>
+        /// Attempts to recreate the original exception using reflection.
+        /// Only works if the exception type exists in the current assembly.
+        /// </summary>
+        /// <returns>The recreated exception, or a generic Exception if recreation fails.</returns>
+        public Exception RecreateException()
+        {
+            try
+            {
+                // Try to find the exception type in the current assembly
+                Type? exceptionType = Assembly.GetExecutingAssembly()
+                    .GetTypes()
+                    .FirstOrDefault(t => t.FullName == ExceptionType && typeof(Exception).IsAssignableFrom(t));
+
+                if (exceptionType != null)
+                {
+                    // Try to create the exception using the message constructor
+                    Exception? exception = Activator.CreateInstance(exceptionType, ExceptionMessage) as Exception;
+                    if (exception != null)
+                    {
+                        return exception;
+                    }
+                }
+            }
+            catch
+            {
+                // Fall through to generic exception
+            }
+
+            // Fallback to generic exception
+            return new Exception(ExceptionMessage);
         }
     }
 }

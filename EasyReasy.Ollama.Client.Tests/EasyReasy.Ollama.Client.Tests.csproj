@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EasyReasy.Ollama.Client\EasyReasy.Ollama.Client.csproj" />
     <ProjectReference Include="..\EasyReasy.Ollama.Common\EasyReasy.Ollama.Common.csproj" />
+    <ProjectReference Include="..\EasyReasy.Ollama.Server\EasyReasy.Ollama.Server.csproj" />
   </ItemGroup>
 
 </Project>
