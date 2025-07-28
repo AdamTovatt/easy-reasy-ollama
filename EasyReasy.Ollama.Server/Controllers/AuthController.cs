@@ -2,6 +2,7 @@ using EasyReasy.Auth;
 using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Models.Tenants;
 using EasyReasy.Ollama.Server.Services.Tenants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -37,6 +38,7 @@ namespace EasyReasy.Ollama.Server.Controllers
         public IActionResult AuthenticateWithApiKey([FromBody] ApiKeyAuthRequest request)
         {
             TenantInfo? tenant = _tenantService.GetTenantInfoByApiKey(request.ApiKey);
+
             if (tenant != null)
             {
                 DateTime expiresAt = DateTime.UtcNow.AddHours(1);
@@ -46,9 +48,29 @@ namespace EasyReasy.Ollama.Server.Controllers
                     additionalClaims: new[] { new Claim("tenant_id", tenant.TenantId) },
                     roles: Array.Empty<string>(),
                     expiresAt: expiresAt);
-                return Ok(new { token, expiresAt = expiresAt.ToString("o") });
+
+                return Ok(new AuthResponse(token, expiresAt.ToString("o")));
             }
+
             return Unauthorized();
+        }
+
+        /// <summary>
+        /// Debug endpoint to test JWT token validation.
+        /// </summary>
+        /// <returns>Information about the authenticated user.</returns>
+        [Authorize]
+        [HttpGet("debug")]
+        public IActionResult DebugAuth()
+        {
+            return Ok(new
+            {
+                isAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                userId = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value,
+                tenantId = User.FindFirst("tenant_id")?.Value,
+                authType = User.FindFirst("auth_type")?.Value,
+                claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList()
+            });
         }
     }
 }

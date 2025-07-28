@@ -20,7 +20,14 @@ namespace EasyReasy.Auth
         /// <param name="issuer">The issuer to use in the JWT tokens. If null, no issuer is set.</param>
         public JwtTokenService(string secret, string? issuer = null)
         {
-            _key = Encoding.UTF8.GetBytes(secret);
+            if (string.IsNullOrEmpty(secret))
+                throw new ArgumentException("JWT secret cannot be null or empty", nameof(secret));
+            
+            byte[] secretBytes = Encoding.UTF8.GetBytes(secret);
+            if (secretBytes.Length < 32)
+                throw new ArgumentException($"JWT secret must be at least 32 bytes (256 bits) for HS256. Current length: {secretBytes.Length} bytes", nameof(secret));
+            
+            _key = secretBytes;
             _issuer = issuer;
         }
 

@@ -72,7 +72,7 @@ namespace EasyReasy.Auth
             // Register JWT token service for dependency injection if requested
             if (registerJwtTokenService)
             {
-                services.AddSingleton<IJwtTokenService>(new JwtTokenService(jwtSecret, issuer));
+                services.AddSingleton<IJwtTokenService>(provider => new JwtTokenService(jwtSecret, issuer));
             }
 
             return services;

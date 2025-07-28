@@ -26,7 +26,9 @@ Install via NuGet:
 ```sh
 # In your web/API project
 dotnet add package EasyReasy.Auth
+dotnet add package Microsoft.IdentityModel.JsonWebTokens
 ```
+> Important note! You will always get 401 Unauthorized if you forget to install `Microsoft.IdentityModel.JsonWebTokens`
 
 ### 2. Configure in Program.cs
 

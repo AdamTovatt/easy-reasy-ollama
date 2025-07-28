@@ -66,8 +66,7 @@ namespace EasyReasy.Ollama.Server
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            // UseEasyReasyAuth includes UseAuthentication() and UseAuthorization()
             app.UseEasyReasyAuth();
 
             app.MapControllers();
