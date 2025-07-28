@@ -41,7 +41,7 @@ app.UseEasyReasyAuth(); // Progressive delay enabled by default
 ```
 
 ### 3. Issue tokens
-
+> You probably want to get an instance of IJWtTokenService via dependency injection in your controller class and create an endpoint in that is responsible for issuing tokens if they should be issued.
 ```csharp
 IJwtTokenService tokenService = new JwtTokenService(jwtSecret, issuer: "my-issuer");
 string token = tokenService.CreateToken(
@@ -65,6 +65,26 @@ string? userId2 = HttpContext.GetClaimValue(EasyReasyClaim.UserId);
 string? tenantId2 = HttpContext.GetClaimValue(EasyReasyClaim.TenantId);
 string? issuer = HttpContext.GetClaimValue(EasyReasyClaim.Issuer);
 ```
+
+## Advanced Configuration
+
+### Opting Out of Automatic Service Registration
+
+If you need more control over the `IJwtTokenService` registration (e.g., for testing, custom implementations, or multiple configurations), you can opt out of automatic registration:
+
+```csharp
+// Register authentication without automatic IJwtTokenService registration
+builder.Services.AddEasyReasyAuth(jwtSecret, issuer: "my-issuer", registerJwtTokenService: false);
+
+// Manually register your own implementation
+builder.Services.AddSingleton<IJwtTokenService>(new MyCustomJwtTokenService(jwtSecret, issuer));
+```
+
+This is useful for:
+- **Testing scenarios**: Mock the service in unit tests
+- **Custom implementations**: Use your own `IJwtTokenService` implementation
+- **Multiple configurations**: Register different JWT services for different purposes
+- **Performance optimization**: Control the service lifetime (singleton vs scoped vs transient)
 
 ## Progressive Delay Middleware
 

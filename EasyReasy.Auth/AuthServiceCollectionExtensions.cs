@@ -12,6 +12,7 @@ namespace EasyReasy.Auth
     {
         /// <summary>
         /// Adds JWT authentication and authorization policies for EasyReasy.
+        /// Also registers the IJwtTokenService for dependency injection.
         /// </summary>
         /// <param name="services">The service collection to add authentication to.</param>
         /// <param name="jwtSecret">The secret key used to sign JWT tokens.</param>
@@ -21,6 +22,24 @@ namespace EasyReasy.Auth
             this IServiceCollection services,
             string jwtSecret,
             string? issuer = null)
+        {
+            return AddEasyReasyAuth(services, jwtSecret, issuer, registerJwtTokenService: true);
+        }
+
+        /// <summary>
+        /// Adds JWT authentication and authorization policies for EasyReasy.
+        /// Optionally registers the IJwtTokenService for dependency injection.
+        /// </summary>
+        /// <param name="services">The service collection to add authentication to.</param>
+        /// <param name="jwtSecret">The secret key used to sign JWT tokens.</param>
+        /// <param name="issuer">The expected issuer for JWT tokens. If null, issuer validation is disabled.</param>
+        /// <param name="registerJwtTokenService">Whether to automatically register IJwtTokenService. Default is true.</param>
+        /// <returns>The service collection for chaining.</returns>
+        public static IServiceCollection AddEasyReasyAuth(
+            this IServiceCollection services,
+            string jwtSecret,
+            string? issuer = null,
+            bool registerJwtTokenService = true)
         {
             byte[] key = Encoding.UTF8.GetBytes(jwtSecret);
 
@@ -49,6 +68,12 @@ namespace EasyReasy.Auth
                 options.AddPolicy("UserOnly", policy =>
                     policy.RequireClaim("auth_type", "user"));
             });
+
+            // Register JWT token service for dependency injection if requested
+            if (registerJwtTokenService)
+            {
+                services.AddSingleton<IJwtTokenService>(new JwtTokenService(jwtSecret, issuer));
+            }
 
             return services;
         }
