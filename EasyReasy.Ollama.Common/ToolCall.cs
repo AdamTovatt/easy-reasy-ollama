@@ -22,14 +22,21 @@ namespace EasyReasy.Ollama.Common
         /// <exception cref="ArgumentException">Thrown when the JSON cannot be deserialized into a <see cref="ToolCall"/>.</exception>
         public static ToolCall FromJson(string json)
         {
-            ToolCall? result = JsonSerializer.Deserialize<ToolCall>(json, JsonSerializerSettings.CurrentOptions);
-
-            if (result == null)
+            try
             {
-                throw new ArgumentException($"Failed to deserialize {nameof(ToolCall)} from json: {json}");
-            }
+                ToolCall? result = JsonSerializer.Deserialize<ToolCall>(json, JsonSerializerSettings.CurrentOptions);
 
-            return result;
+                if (result == null)
+                {
+                    throw new ArgumentException($"Failed to deserialize {nameof(ToolCall)} from json: {json}");
+                }
+
+                return result;
+            }
+            catch (JsonException jsonException)
+            {
+                throw new ArgumentException($"Failed to deserialize {nameof(ToolCall)} from json: {json}", jsonException);
+            }
         }
 
         /// <summary>
@@ -43,11 +50,6 @@ namespace EasyReasy.Ollama.Common
         {
             try
             {
-                if (json.IndexOf("\"parameters\":") != -1)
-                {
-                    json = json.Replace("\"parameters\":", "\"arguments\":");
-                }
-
                 ToolCall? result = JsonSerializer.Deserialize<ToolCall>(json, JsonSerializerSettings.CurrentOptions);
 
                 if (result == null && throwOnError)
@@ -59,7 +61,12 @@ namespace EasyReasy.Ollama.Common
             }
             catch (JsonException jsonException)
             {
-                throw new ArgumentException($"Failed to deserialize {nameof(ToolCall)} from json: {json}", jsonException);
+                if (throwOnError)
+                {
+                    throw new ArgumentException($"Failed to deserialize {nameof(ToolCall)} from json: {json}", jsonException);
+                }
+
+                return null;
             }
         }
 

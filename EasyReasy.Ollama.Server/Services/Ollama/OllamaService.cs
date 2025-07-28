@@ -1,5 +1,4 @@
 using OllamaSharp;
-using OllamaSharp.Models;
 using EasyReasy.Ollama.Server.Providers;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
@@ -14,7 +13,6 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         protected bool _keepModelLoaded;
         private bool _disposed;
         protected ILogger _logger;
-        private IAllowedModelsProvider _allowedModelsProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OllamaService"/> class.
@@ -33,7 +31,6 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
             _client = new OllamaApiClient(url, model);
             _keepModelLoaded = keepModelLoaded;
             _logger = logger;
-            _allowedModelsProvider = allowedModelsProvider;
         }
 
         /// <summary>

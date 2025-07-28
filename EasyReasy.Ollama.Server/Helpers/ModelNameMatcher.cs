@@ -30,7 +30,7 @@
             else
             {
                 // No version specified, match any model that starts with modelName + ":"
-                string prefix = modelName + ":";
+                string prefix = modelName;
                 foreach (string availableModel in nameCollection)
                     if (availableModel.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                         return true;

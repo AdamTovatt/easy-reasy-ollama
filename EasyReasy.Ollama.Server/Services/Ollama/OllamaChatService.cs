@@ -5,9 +5,7 @@ using EasyReasy.Ollama.Server.Extensions;
 using EasyReasy.Ollama.Common;
 using Message = EasyReasy.Ollama.Common.Message;
 using ChatRole = EasyReasy.Ollama.Common.ChatRole;
-using OllamaSharp;
 using System.Text;
-using System.Text.Json;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -16,6 +14,8 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
     /// </summary>
     public class OllamaChatService : OllamaService, IOllamaChatService
     {
+        private static readonly JsonCleaner _jsonCleaner = new JsonCleaner("function", "parameters", "arguments");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OllamaChatService"/> class.
         /// </summary>
@@ -120,6 +120,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
                         if (toolName == null)
                             throw new Exception($"Model failed to specify tool name in a tool call");
 
+                        // Add the start of the json before
                         toolCallJsonBuilder = new StringBuilder($"{{\"function\":{{\"index\":null,\"name\":\"{toolName}");
                     }
 
@@ -137,7 +138,9 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
                         if (message.Done)
                         {
-                            ToolCall? toolCall = ToolCall.FromJson($"{toolCallJsonBuilder}}}", throwOnError: false);
+                            // Add closing "}" after the json since we added a start json snippet containing "{"
+                            string cleanedJson = _jsonCleaner.CleanJson($"{toolCallJsonBuilder}}}");
+                            ToolCall? toolCall = ToolCall.FromJson(cleanedJson, throwOnError: false);
 
                             if (toolCall == null)
                                 throw new Exception($"Model provided invalid tool call json: {toolCallJsonBuilder}");

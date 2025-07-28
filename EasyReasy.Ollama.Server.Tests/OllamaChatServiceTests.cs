@@ -123,7 +123,7 @@ namespace EasyReasy.Ollama.Server.Tests
             };
 
             PossibleParameter possibleParameter = new PossibleParameter("city", "string", "Name of the city", true);
-            ToolDefinition toolDefinition = new ToolDefinition("Get current weather", "Get the current weather for a city", new List<PossibleParameter>() { possibleParameter });
+            ToolDefinition toolDefinition = new ToolDefinition("GetCurrentWeather", "Get the current weather for a city", new List<PossibleParameter>() { possibleParameter });
 
             IAsyncEnumerable<ChatResponsePart> response = _chatService.GetResponseAsync(messages, new List<ToolDefinition>() { toolDefinition }, CancellationToken.None);
 
