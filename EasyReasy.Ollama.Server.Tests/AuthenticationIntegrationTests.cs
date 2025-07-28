@@ -50,14 +50,14 @@ namespace EasyReasy.Ollama.Server.Tests
 
             // Assert
             Assert.IsTrue(response.IsSuccessStatusCode, $"Expected success status code, but got {response.StatusCode}");
-            
+
             string responseContent = await response.Content.ReadAsStringAsync();
             AuthResponse? authResponse = JsonSerializer.Deserialize<AuthResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
+
             Assert.IsNotNull(authResponse);
             Assert.IsFalse(string.IsNullOrEmpty(authResponse.Token));
             Assert.IsFalse(string.IsNullOrEmpty(authResponse.ExpiresAt));
-            
+
             // Debug: Print token details
             Console.WriteLine($"Token: {authResponse.Token}");
             Console.WriteLine($"ExpiresAt: {authResponse.ExpiresAt}");
@@ -95,19 +95,19 @@ namespace EasyReasy.Ollama.Server.Tests
             object authRequest = new { apiKey = "test-api-key" };
             string authJson = JsonSerializer.Serialize(authRequest);
             StringContent authContent = new StringContent(authJson, Encoding.UTF8, "application/json");
-            
+
             HttpResponseMessage authResponse = await _client.PostAsync("/api/auth/apikey", authContent);
             Assert.IsTrue(authResponse.IsSuccessStatusCode);
-            
+
             string authResponseContent = await authResponse.Content.ReadAsStringAsync();
             AuthResponse? authResult = JsonSerializer.Deserialize<AuthResponse>(authResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
+
             // Debug: Print token details
             Console.WriteLine($"Token for stream test: {authResult!.Token}");
-            
+
             // Act - Use the token to access the stream endpoint
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
-            HttpResponseMessage streamResponse = await _client.GetAsync("/stream-sse?text=Hello");
+            HttpResponseMessage streamResponse = await _client.GetAsync("/stream-sse?text=Hello&model=llama3.1");
 
             // Debug: Print response details
             Console.WriteLine($"Stream response status: {streamResponse.StatusCode}");
@@ -116,6 +116,37 @@ namespace EasyReasy.Ollama.Server.Tests
 
             // Assert
             Assert.IsTrue(streamResponse.IsSuccessStatusCode, $"Expected success status code, but got {streamResponse.StatusCode}");
+            Assert.AreEqual("text/event-stream", streamResponse.Content.Headers.ContentType?.MediaType);
+        }
+
+        [TestMethod]
+        public async Task StreamSse_WithValidTokenButInvalidModel_ReturnsReadableError()
+        {
+            // Arrange - First get a valid token
+            object authRequest = new { apiKey = "test-api-key" };
+            string authJson = JsonSerializer.Serialize(authRequest);
+            StringContent authContent = new StringContent(authJson, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage authResponse = await _client.PostAsync("/api/auth/apikey", authContent);
+            Assert.IsTrue(authResponse.IsSuccessStatusCode);
+
+            string authResponseContent = await authResponse.Content.ReadAsStringAsync();
+            AuthResponse? authResult = JsonSerializer.Deserialize<AuthResponse>(authResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            // Debug: Print token details
+            Console.WriteLine($"Token for stream test: {authResult!.Token}");
+
+            // Act - Use the token to access the stream endpoint
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
+            HttpResponseMessage streamResponse = await _client.GetAsync("/stream-sse?text=Hello&model=fakemodel");
+
+            // Debug: Print response details
+            Console.WriteLine($"Stream response status: {streamResponse.StatusCode}");
+            string streamResponseContent = await streamResponse.Content.ReadAsStringAsync();
+            Console.WriteLine($"Stream response content: {streamResponseContent}");
+
+            // Assert
+            Assert.IsFalse(streamResponse.IsSuccessStatusCode, $"Expected failure status code, but got {streamResponse.StatusCode}");
             Assert.AreEqual("text/event-stream", streamResponse.Content.Headers.ContentType?.MediaType);
         }
 
@@ -144,4 +175,4 @@ namespace EasyReasy.Ollama.Server.Tests
             public string Value { get; set; } = string.Empty;
         }
     }
-} 
+}

@@ -3,6 +3,7 @@ using EasyReasy.Ollama.Server.Providers;
 using System.Collections.Concurrent;
 using OllamaSharp;
 using OllamaSharp.Models;
+using EasyReasy.Ollama.Common;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -51,7 +52,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
                 throw new ArgumentException("Model name cannot be null or whitespace.", nameof(modelName));
 
             if (!_allowedModelsProvider.IsModelAllowed(modelName))
-                throw new ArgumentException($"Model '{modelName}' is not allowed. Configure it in the environment variables of the server service if you think it should be allowed.", nameof(modelName));
+                throw new ModelNotAllowedException($"Model '{modelName}' is not allowed. Configure it in the environment variables of the server service if you think it should be allowed.");
 
             return _chatServices.GetOrAdd(modelName, CreateChatService);
         }
