@@ -6,6 +6,8 @@ using EasyReasy.Ollama.Common;
 using Message = EasyReasy.Ollama.Common.Message;
 using ChatRole = EasyReasy.Ollama.Common.ChatRole;
 using OllamaSharp;
+using System.Text;
+using System.Text.Json;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -100,18 +102,54 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
             IAsyncEnumerable<ChatResponseStream?> result = _client.ChatAsync(chatRequest, cancellationToken);
 
+            StringBuilder? toolCallJsonBuilder = null;
+
             await foreach (ChatResponseStream? message in result.ConfigureAwait(false))
             {
                 if (message == null)
                     continue;
 
+                // Check if this message contains tool calls
                 if (message.Message.ToolCalls != null && message.Message.ToolCalls.Any())
                 {
-                    yield return new ChatResponsePart(message.Message.ToolCalls.ToCommon());
+                    // Start collecting tool call JSON
+                    if (toolCallJsonBuilder == null)
+                    {
+                        string? toolName = message.Message.ToolCalls.First().Function?.Name;
+
+                        if (toolName == null)
+                            throw new Exception($"Model failed to specify tool name in a tool call");
+
+                        toolCallJsonBuilder = new StringBuilder($"{{\"function\":{{\"index\":null,\"name\":\"{toolName}");
+                    }
+
+                    // Add the tool call content to our builder
+                    if (!string.IsNullOrEmpty(message.Message.Content))
+                    {
+                        toolCallJsonBuilder.Append(message.Message.Content);
+                    }
                 }
                 else if (message.Message.Content != null)
                 {
-                    yield return new ChatResponsePart(message.Message.Content);
+                    if (toolCallJsonBuilder != null)
+                    {
+                        toolCallJsonBuilder.Append(message.Message.Content);
+
+                        if (message.Done)
+                        {
+                            ToolCall? toolCall = ToolCall.FromJson($"{toolCallJsonBuilder}}}", throwOnError: false);
+
+                            if (toolCall == null)
+                                throw new Exception($"Model provided invalid tool call json: {toolCallJsonBuilder}");
+
+                            yield return new ChatResponsePart(toolCall);
+                        }
+                    }
+                    else
+                    {
+                        // Return normal content
+                        yield return new ChatResponsePart(message.Message.Content);
+                    }
                 }
             }
         }

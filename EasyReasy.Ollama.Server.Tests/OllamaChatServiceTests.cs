@@ -67,7 +67,7 @@ namespace EasyReasy.Ollama.Server.Tests
         [TestMethod]
         public async Task ChatService_ModelGeneratesToolCalls_WithToolDefinitions()
         {
-            StringBuilder totalResponse = new StringBuilder();
+            StringBuilder totalResponseTextContent = new StringBuilder();
 
             // Test scenario where we provide tool definitions to the model
             // Note: This test demonstrates what SHOULD work if the service supported tool definitions
@@ -82,31 +82,94 @@ namespace EasyReasy.Ollama.Server.Tests
 
             IAsyncEnumerable<ChatResponsePart> response = _chatService.GetResponseAsync(messages, new List<ToolDefinition>() { toolDefinition }, CancellationToken.None);
 
-            List<ToolCall> toolCalls = new List<ToolCall>();
+            ToolCall? toolCall = null;
+            int responseParts = 0;
 
             await foreach (ChatResponsePart part in response)
             {
-                if (part.ToolCalls != null)
+                responseParts++;
+
+                if (part.ToolCall != null)
                 {
                     Console.WriteLine($"This was a tool call");
 
-                    foreach (ToolCall call in part.ToolCalls)
-                    {
-                        toolCalls.Add(call);
-                    }
+                    Console.WriteLine($"Tool call json: {part.ToolCall.ToJson()}");
+                    toolCall = part.ToolCall;
                 }
                 else
                 {
-                    totalResponse.Append(part.Message);
+                    totalResponseTextContent.Append(part.Message);
                 }
             }
 
-            Console.WriteLine("Model response (text only):");
-            Console.WriteLine(totalResponse.ToString());
-            Console.WriteLine();
-            Console.WriteLine("Note: This test demonstrates the limitation - the model doesn't know about available tools");
-            Console.WriteLine("because the service doesn't provide tool definitions to the model.");
-            Console.WriteLine("The model would need to be told what tools are available via the ChatRequest.");
+            Assert.AreEqual(1, responseParts, "Response should only have one part which is the tool call.");
+            Assert.AreEqual(string.Empty, totalResponseTextContent.ToString(), "Total text content result should be empty.");
+            Assert.IsNotNull(toolCall);
+            Assert.IsNotNull(toolCall.Function);
+            Assert.AreEqual(toolDefinition.Name, toolCall.Function.Name);
+            Assert.IsNotNull(toolCall.Function.Arguments);
+            Assert.AreEqual(1, toolCall.Function.Arguments.Count());
+        }
+
+        [TestMethod]
+        public async Task ChatService_ModelUnderstandToolCallResults_WithToolDefinitions()
+        {
+            // Test scenario where we provide tool definitions to the model
+            // Note: This test demonstrates what SHOULD work if the service supported tool definitions
+            List<Message> messages = new List<Message>
+            {
+                new Message(ChatRole.System, "You are a helpful assistant with access to a weather tool function. Call the tool with the correct parameters if you need it."),
+                new Message(ChatRole.User, "What's the weather like in London? Please give me the temperature in both farenheight and celsius")
+            };
+
+            PossibleParameter possibleParameter = new PossibleParameter("city", "string", "Name of the city", true);
+            ToolDefinition toolDefinition = new ToolDefinition("Get current weather", "Get the current weather for a city", new List<PossibleParameter>() { possibleParameter });
+
+            IAsyncEnumerable<ChatResponsePart> response = _chatService.GetResponseAsync(messages, new List<ToolDefinition>() { toolDefinition }, CancellationToken.None);
+
+            ToolCall? toolCall = null;
+            StringBuilder totalResponseTextContent = new StringBuilder();
+
+            await foreach (ChatResponsePart part in response)
+            {
+                if (part.ToolCall != null)
+                {
+                    toolCall = part.ToolCall;
+                }
+                else
+                {
+                    totalResponseTextContent.Append(part.Message);
+                }
+            }
+
+            Assert.IsNotNull(toolCall, "Tool call should not be null. Response was: " + totalResponseTextContent.ToString());
+            Assert.IsNotNull(toolCall.Function, "Tool call function should not be null");
+            Assert.IsNotNull(toolCall.Function.Name);
+
+            Message toolCallMessage = new Message(toolCall.Function.Name, "{\"cityName\":\"London\",\"temperatureCelsius\":\"22\",\"skyCondition\":\"clear\",\"chanceOfRain\":\"0\"}");
+
+            messages.Add(toolCallMessage);
+
+            response = _chatService.GetResponseAsync(messages, new List<ToolDefinition>() { toolDefinition }, CancellationToken.None);
+            toolCall = null;
+            totalResponseTextContent.Clear();
+
+            await foreach (ChatResponsePart part in response)
+            {
+                if (part.ToolCall != null)
+                {
+                    toolCall = part.ToolCall;
+                }
+                else
+                {
+                    totalResponseTextContent.Append(part.Message);
+                }
+            }
+
+            Assert.IsNull(toolCall, "Tool call should be null when getting text response to previous tool cal result.");
+            Assert.IsFalse(string.IsNullOrEmpty(totalResponseTextContent.ToString()), "Total text response should not be null or empty");
+
+            Console.WriteLine(totalResponseTextContent.ToString());
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace EasyReasy.Ollama.Common
 {
     /// <summary>
-    /// Represents a part of a response from an LLM model, which can contain either a message or tool calls.
+    /// Represents a part of a response from an LLM model, which can contain either a message or a tool call.
     /// </summary>
     public class ChatResponsePart
     {
@@ -13,52 +13,41 @@ namespace EasyReasy.Ollama.Common
         public string? Message { get; set; }
 
         /// <summary>
-        /// Gets or sets the tool calls in the response part.
+        /// Gets or sets the tool call in the response part.
         /// </summary>
-        public List<ToolCall>? ToolCalls { get; set; }
+        public ToolCall? ToolCall { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with both message and tool calls.
+        /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with both message and tool call.
         /// </summary>
         /// <param name="message">The message content.</param>
-        /// <param name="toolCalls">The tool calls.</param>
-        public ChatResponsePart(string? message, List<ToolCall>? toolCalls)
+        /// <param name="toolCall">The tool call.</param>
+        public ChatResponsePart(string? message, ToolCall? toolCall)
         {
             Message = message;
-            ToolCalls = toolCalls;
+            ToolCall = toolCall;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with only a message.
-        /// Tool calls are assumed to be null.
+        /// Tool call is assumed to be null.
         /// </summary>
         /// <param name="message">The message content.</param>
         public ChatResponsePart(string message)
         {
             Message = message;
-            ToolCalls = null;
+            ToolCall = null;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with only tool calls.
+        /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with only a tool call.
         /// Message is assumed to be null.
         /// </summary>
-        /// <param name="toolCalls">The tool calls.</param>
-        public ChatResponsePart(List<ToolCall> toolCalls)
+        /// <param name="toolCall">The tool call.</param>
+        public ChatResponsePart(ToolCall toolCall)
         {
             Message = null;
-            ToolCalls = toolCalls;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ChatResponsePart"/> class with only tool calls.
-        /// Message is assumed to be null.
-        /// </summary>
-        /// <param name="toolCalls">The tool calls.</param>
-        public ChatResponsePart(IEnumerable<ToolCall> toolCalls)
-        {
-            Message = null;
-            ToolCalls = toolCalls?.ToList();
+            ToolCall = toolCall;
         }
 
         /// <summary>

@@ -85,10 +85,36 @@ namespace EasyReasy.Ollama.Common
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Message"/> class with the specified role, tool name, and content.
+        /// </summary>
+        /// <param name="role">The role of the message, either system, user, or assistant.</param>
+        /// <param name="toolName">The name of the tool that was executed.</param>
+        /// <param name="content">The content of the message.</param>
+        public Message(ChatRole role, string toolName, string content)
+        {
+            Role = role;
+            ToolName = toolName;
+            Content = content;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Message"/> class with the specified tool name and content.
+        /// Role is automatically set to <see cref="ChatRole.Tool"/>.
+        /// </summary>
+        /// <param name="toolName">The name of the tool that was executed.</param>
+        /// <param name="content">The content of the message.</param>
+        public Message(string toolName, string content)
+        {
+            Role = ChatRole.Tool;
+            ToolName = toolName;
+            Content = content;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Message"/> class. Required for JSON deserialization.
         /// </summary>
         public Message()
         {
         }
     }
-} 
+}
