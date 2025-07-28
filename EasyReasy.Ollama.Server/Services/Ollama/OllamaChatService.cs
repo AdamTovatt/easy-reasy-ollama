@@ -150,8 +150,11 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
                     }
                     else
                     {
-                        // Return normal content
-                        yield return new ChatResponsePart(message.Message.Content);
+                        if (message.Message.Content != string.Empty)
+                        {
+                            // Return normal content
+                            yield return new ChatResponsePart(message.Message.Content);
+                        }
                     }
                 }
             }

@@ -37,8 +37,6 @@ string jwtSecret = Environment.GetEnvironmentVariable("JWT_SIGNING_SECRET")!;
 builder.Services.AddEasyReasyAuth(jwtSecret, issuer: "my-issuer");
 
 var app = builder.Build();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseEasyReasyAuth(); // Progressive delay enabled by default
 ```
 

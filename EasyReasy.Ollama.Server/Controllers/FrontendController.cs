@@ -9,15 +9,15 @@ namespace EasyReasy.Ollama.Server.Controllers
     [Route("")]
     public class FrontendController : ControllerBase
     {
-        private readonly IOllamaChatService _ollamaChatService;
+        private readonly IOllamaServiceFactory _ollamaServiceFactory;
         private readonly ResourceManager _resourceManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FrontendController"/> class.
         /// </summary>
-        public FrontendController(IOllamaChatService ollamaChatService, ResourceManager resourceManager)
+        public FrontendController(IOllamaServiceFactory ollamaServiceFactory, ResourceManager resourceManager)
         {
-            _ollamaChatService = ollamaChatService;
+            _ollamaServiceFactory = ollamaServiceFactory;
             _resourceManager = resourceManager;
         }
 
@@ -63,8 +63,10 @@ namespace EasyReasy.Ollama.Server.Controllers
         [HttpGet("stream-sse")]
         public async Task StreamSse(string text, CancellationToken cancellationToken)
         {
+            IOllamaChatService chatService = _ollamaServiceFactory.GetChatService("llama3.1");
+
             Response.ContentType = "text/event-stream";
-            await foreach (ChatResponsePart responsePart in _ollamaChatService.GetResponseAsync(text, cancellationToken))
+            await foreach (ChatResponsePart responsePart in chatService.GetResponseAsync(text, cancellationToken))
             {
                 await Response.WriteAsync($"data: {responsePart}\n\n", cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);

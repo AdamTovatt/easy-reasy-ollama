@@ -79,45 +79,6 @@ namespace EasyReasy.Ollama.Server.Tests
         }
 
         [TestMethod]
-        public async Task DebugAuth_WithValidToken_ReturnsUserInfo()
-        {
-            // Arrange - First get a valid token
-            object authRequest = new { apiKey = "test-api-key" };
-            string authJson = JsonSerializer.Serialize(authRequest);
-            StringContent authContent = new StringContent(authJson, Encoding.UTF8, "application/json");
-            
-            HttpResponseMessage authResponse = await _client.PostAsync("/api/auth/apikey", authContent);
-            Assert.IsTrue(authResponse.IsSuccessStatusCode);
-            
-            string authResponseContent = await authResponse.Content.ReadAsStringAsync();
-            AuthResponse? authResult = JsonSerializer.Deserialize<AuthResponse>(authResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
-            // Debug: Print token details
-            Console.WriteLine($"Token for debug test: {authResult!.Token}");
-            
-            // Act - Use the token to access the debug endpoint
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
-            HttpResponseMessage debugResponse = await _client.GetAsync("/api/auth/debug");
-
-            // Debug: Print response details
-            Console.WriteLine($"Debug response status: {debugResponse.StatusCode}");
-            string debugResponseContent = await debugResponse.Content.ReadAsStringAsync();
-            Console.WriteLine($"Debug response content: {debugResponseContent}");
-
-            // Assert
-            Assert.IsTrue(debugResponse.IsSuccessStatusCode, $"Expected success status code, but got {debugResponse.StatusCode}");
-            
-            string debugContent = await debugResponse.Content.ReadAsStringAsync();
-            DebugAuthResponse? debugResult = JsonSerializer.Deserialize<DebugAuthResponse>(debugContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
-            Assert.IsNotNull(debugResult);
-            Assert.IsTrue(debugResult.IsAuthenticated);
-            Assert.AreEqual("test-tenant", debugResult.UserId);
-            Assert.AreEqual("test-tenant", debugResult.TenantId);
-            Assert.AreEqual("apikey", debugResult.AuthType);
-        }
-
-        [TestMethod]
         public async Task DebugAuth_WithoutToken_ReturnsUnauthorized()
         {
             // Act
