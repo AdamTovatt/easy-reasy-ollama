@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace EasyReasy.Ollama.Common
 {
     /// <summary>
@@ -31,6 +33,49 @@ namespace EasyReasy.Ollama.Common
             ModelName = modelName;
             Messages = messages;
             ToolDefinitions = toolDefinitions;
+        }
+
+        /// <summary>
+        /// Serializes this <see cref="ChatRequest"/> instance to a JSON string.
+        /// </summary>
+        /// <returns>A JSON string representation of this <see cref="ChatRequest"/> instance.</returns>
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(this, JsonSerializerSettings.CurrentOptions);
+        }
+
+        /// <summary>
+        /// Returns a JSON string representation of this <see cref="ChatRequest"/> instance.
+        /// </summary>
+        /// <returns>A JSON string representation of this <see cref="ChatRequest"/> instance.</returns>
+        public override string ToString()
+        {
+            return ToJson();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ChatRequest"/> instance from a JSON string.
+        /// </summary>
+        /// <param name="json">The JSON string to deserialize.</param>
+        /// <returns>A <see cref="ChatRequest"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown when the JSON cannot be deserialized into a <see cref="ChatRequest"/>.</exception>
+        public static ChatRequest FromJson(string json)
+        {
+            try
+            {
+                ChatRequest? result = JsonSerializer.Deserialize<ChatRequest>(json, JsonSerializerSettings.CurrentOptions);
+
+                if (result == null)
+                {
+                    throw new ArgumentException($"Failed to deserialize {nameof(ChatRequest)} from json: {json}");
+                }
+
+                return result;
+            }
+            catch (JsonException jsonException)
+            {
+                throw new ArgumentException($"Failed to deserialize {nameof(ChatRequest)} from json: {json}", jsonException);
+            }
         }
     }
 }
