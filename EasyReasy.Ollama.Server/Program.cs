@@ -39,6 +39,15 @@ namespace EasyReasy.Ollama.Server
                 return new OllamaServiceFactory(ollamaUrl, chatLogger, embeddingLogger, allowedModelsProvider);
             });
 
+            // Register default IOllamaChatService using the first allowed model
+            builder.Services.AddSingleton<IOllamaChatService>(provider =>
+            {
+                IOllamaServiceFactory factory = provider.GetRequiredService<IOllamaServiceFactory>();
+                IAllowedModelsProvider allowedModelsProvider = provider.GetRequiredService<IAllowedModelsProvider>();
+                string defaultModel = allowedModelsProvider.GetAllowedModels().First();
+                return factory.GetChatService(defaultModel);
+            });
+
             // Register TenantService
             builder.Services.AddSingleton<ITenantService, EnvironmentVariablesTenantService>();
 

@@ -8,13 +8,23 @@ namespace EasyReasy.Auth
     /// </summary>
     public class ClaimsInjectionMiddleware : IClaimsInjectionMiddleware
     {
+        private readonly RequestDelegate _next;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClaimsInjectionMiddleware"/> class.
+        /// </summary>
+        /// <param name="next">The next middleware in the pipeline.</param>
+        public ClaimsInjectionMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
         /// <summary>
         /// Processes the HTTP request and injects user and tenant id claims into the context items.
         /// </summary>
         /// <param name="context">The HTTP context.</param>
-        /// <param name="next">The next middleware in the pipeline.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context)
         {
             if (context.User.Identity != null && context.User.Identity.IsAuthenticated)
             {
@@ -23,7 +33,7 @@ namespace EasyReasy.Auth
                 context.Items["UserId"] = userId;
                 context.Items["TenantId"] = tenantId;
             }
-            await next(context);
+            await _next(context);
         }
     }
 }

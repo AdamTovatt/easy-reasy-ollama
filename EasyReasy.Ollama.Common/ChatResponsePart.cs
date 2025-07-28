@@ -74,5 +74,13 @@ namespace EasyReasy.Ollama.Common
 
             return result;
         }
+
+        /// <summary>
+        /// Overrides the ToString method so that it returns the json version of the object.
+        /// </summary>
+        public override string ToString()
+        {
+            return ToJson();
+        }
     }
 }

@@ -27,5 +27,13 @@ namespace EasyReasy.Ollama.Server
         /// </summary>
         [EnvironmentVariableNameRange(minCount: 1)]
         public static VariableNameRange AllowedModels = new VariableNameRange("ALLOWED_MODEL");
+
+        /// <summary>
+        /// A range of environment variables that define tenant information.
+        /// Uses the prefix "TENANT_INFO" and requires at least 1 tenant to be defined.
+        /// Examples: TENANT_INFO1, TENANT_INFO2, TENANT_INFO_DEV, etc.
+        /// </summary>
+        [EnvironmentVariableNameRange(minCount: 1)]
+        public static VariableNameRange TenantInfo = new VariableNameRange("TENANT_INFO");
     }
 }

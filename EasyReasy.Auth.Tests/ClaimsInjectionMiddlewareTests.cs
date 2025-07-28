@@ -20,9 +20,9 @@ namespace EasyReasy.Auth.Tests
             DefaultHttpContext context = new DefaultHttpContext { User = principal };
             bool nextCalled = false;
             RequestDelegate next = ctx => { nextCalled = true; return Task.CompletedTask; };
-            ClaimsInjectionMiddleware middleware = new ClaimsInjectionMiddleware();
+            ClaimsInjectionMiddleware middleware = new ClaimsInjectionMiddleware(next);
 
-            await middleware.InvokeAsync(context, next);
+            await middleware.InvokeAsync(context);
 
             Assert.IsTrue(nextCalled);
             Assert.AreEqual("user-123", context.Items["UserId"]);
@@ -37,9 +37,9 @@ namespace EasyReasy.Auth.Tests
             DefaultHttpContext context = new DefaultHttpContext { User = principal };
             bool nextCalled = false;
             RequestDelegate next = ctx => { nextCalled = true; return Task.CompletedTask; };
-            ClaimsInjectionMiddleware middleware = new ClaimsInjectionMiddleware();
+            ClaimsInjectionMiddleware middleware = new ClaimsInjectionMiddleware(next);
 
-            await middleware.InvokeAsync(context, next);
+            await middleware.InvokeAsync(context);
 
             Assert.IsTrue(nextCalled);
             Assert.IsFalse(context.Items.ContainsKey("UserId"));

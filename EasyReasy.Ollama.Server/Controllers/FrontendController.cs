@@ -1,5 +1,6 @@
 using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Services.Ollama;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EasyReasy.Ollama.Server.Controllers
@@ -58,6 +59,7 @@ namespace EasyReasy.Ollama.Server.Controllers
         /// </summary>
         /// <param name="text">The user input text.</param>
         /// <param name="cancellationToken">Cancellation token for the request.</param>
+        [Authorize]
         [HttpGet("stream-sse")]
         public async Task StreamSse(string text, CancellationToken cancellationToken)
         {

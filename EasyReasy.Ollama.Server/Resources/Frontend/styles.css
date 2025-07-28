@@ -237,4 +237,37 @@ body {
 #chat-input:focus {
     outline: none;
     border-color: var(--color-border);
+}
+
+/* Tool call styles */
+.tool-call {
+    margin: 0.5rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg);
+    overflow: hidden;
+}
+
+.tool-call-header {
+    background: var(--color-border);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-fg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tool-call-content {
+    padding: 0.75rem;
+}
+
+.tool-call-content pre {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-fg);
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--color-bg);
+    border-radius: 4px;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
 } 

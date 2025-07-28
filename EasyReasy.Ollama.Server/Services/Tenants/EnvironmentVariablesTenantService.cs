@@ -1,4 +1,5 @@
 using EasyReasy.Ollama.Server.Models.Tenants;
+using EasyReasy.EnvironmentVariables;
 using System.Collections.Concurrent;
 
 namespace EasyReasy.Ollama.Server.Services.Tenants
@@ -15,15 +16,12 @@ namespace EasyReasy.Ollama.Server.Services.Tenants
         /// </summary>
         public EnvironmentVariablesTenantService()
         {
-            int index = 1;
+            IEnumerable<string> tenantInfoValues = EnvironmentVariables.TenantInfo.GetAllValues();
 
-            while (true)
+            foreach (string value in tenantInfoValues)
             {
-                string environmentVariableName = index == 1 ? "TENANT_INFO" : $"TENANT_INFO{index}";
-                string? value = Environment.GetEnvironmentVariable(environmentVariableName);
-
                 if (string.IsNullOrWhiteSpace(value))
-                    break;
+                    continue;
 
                 string[] parts = value.Split(',', 2);
 
@@ -37,8 +35,6 @@ namespace EasyReasy.Ollama.Server.Services.Tenants
                         _apiKeyToTenant[apiKey] = info;
                     }
                 }
-
-                index++;
             }
         }
 
