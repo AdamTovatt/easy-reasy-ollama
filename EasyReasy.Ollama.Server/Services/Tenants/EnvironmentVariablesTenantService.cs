@@ -1,5 +1,5 @@
-using EasyReasy.Ollama.Server.Models.Tenants;
 using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Server.Models.Tenants;
 using System.Collections.Concurrent;
 
 namespace EasyReasy.Ollama.Server.Services.Tenants

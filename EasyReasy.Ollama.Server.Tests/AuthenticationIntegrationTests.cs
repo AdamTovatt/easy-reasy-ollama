@@ -1,5 +1,4 @@
 using EasyReasy.Auth;
-using EasyReasy.Ollama.Common;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http.Headers;
 using System.Text;

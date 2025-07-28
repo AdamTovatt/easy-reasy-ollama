@@ -2,8 +2,6 @@ using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Text.Json;
 
 namespace EasyReasy.Ollama.Server.Controllers
 {
@@ -58,6 +56,7 @@ namespace EasyReasy.Ollama.Server.Controllers
 
         /// <summary>
         /// Streams chat responses using Server-Sent Events (SSE).
+        /// This endpoint is kept for backward compatibility with the frontend.
         /// </summary>
         /// <param name="text">The user input text.</param>
         /// <param name="cancellationToken">Cancellation token for the request.</param>

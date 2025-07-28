@@ -77,4 +77,4 @@ namespace EasyReasy.Ollama.Server.Extensions
             return functions.Select(f => f.ToCommon()).ToList();
         }
     }
-} 
+}

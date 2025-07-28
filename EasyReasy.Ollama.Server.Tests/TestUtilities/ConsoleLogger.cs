@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace EasyReasy.Ollama.Server.Tests.TestUtilities
 {
@@ -24,4 +23,4 @@ namespace EasyReasy.Ollama.Server.Tests.TestUtilities
             public void Dispose() { }
         }
     }
-} 
+}

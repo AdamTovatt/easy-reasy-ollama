@@ -25,4 +25,4 @@ namespace EasyReasy.Ollama.Common
         [JsonPropertyName("arguments")]
         public IDictionary<string, object?>? Arguments { get; set; }
     }
-} 
+}

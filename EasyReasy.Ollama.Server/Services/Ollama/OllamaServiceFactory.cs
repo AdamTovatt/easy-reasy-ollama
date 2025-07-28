@@ -1,9 +1,9 @@
+using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Helpers;
 using EasyReasy.Ollama.Server.Providers;
-using System.Collections.Concurrent;
 using OllamaSharp;
 using OllamaSharp.Models;
-using EasyReasy.Ollama.Common;
+using System.Collections.Concurrent;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -161,7 +161,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
             foreach (string allowedModel in allowedModels)
             {
                 bool isAvailable = await IsModelAvailableAsync(allowedModel, cancellationToken).ConfigureAwait(false);
-                
+
                 if (!isAvailable)
                 {
                     await PullModelAsync(allowedModel, cancellationToken).ConfigureAwait(false);
@@ -205,4 +205,4 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
             return OllamaEmbeddingService.Create(_ollamaUrl, modelName, _embeddingLogger, _allowedModelsProvider);
         }
     }
-} 
+}

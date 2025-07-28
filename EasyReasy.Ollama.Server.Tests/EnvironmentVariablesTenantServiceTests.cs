@@ -1,5 +1,5 @@
-using EasyReasy.Ollama.Server.Services.Tenants;
 using EasyReasy.Ollama.Server.Models.Tenants;
+using EasyReasy.Ollama.Server.Services.Tenants;
 
 namespace EasyReasy.Ollama.Server.Tests
 {
@@ -195,4 +195,4 @@ namespace EasyReasy.Ollama.Server.Tests
             Environment.SetEnvironmentVariable("TENANT_INFO_WHITESPACE", null);
         }
     }
-} 
+}

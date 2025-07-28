@@ -1,5 +1,5 @@
-using OllamaSharp.Models;
 using EasyReasy.Ollama.Server.Providers;
+using OllamaSharp.Models;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {

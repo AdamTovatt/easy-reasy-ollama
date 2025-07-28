@@ -1,8 +1,8 @@
 using EasyReasy.Auth;
 using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Server.Providers;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Services.Tenants;
-using EasyReasy.Ollama.Server.Providers;
 
 namespace EasyReasy.Ollama.Server
 {

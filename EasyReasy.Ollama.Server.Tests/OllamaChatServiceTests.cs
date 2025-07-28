@@ -1,10 +1,10 @@
 using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Common;
 using EasyReasy.Ollama.Server.Providers;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Tests.TestUtilities;
 using Microsoft.Extensions.Logging;
 using System.Text;
-using EasyReasy.Ollama.Common;
 
 namespace EasyReasy.Ollama.Server.Tests
 {

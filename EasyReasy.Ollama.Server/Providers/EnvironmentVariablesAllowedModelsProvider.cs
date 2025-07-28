@@ -62,4 +62,4 @@ namespace EasyReasy.Ollama.Server.Providers
             return ModelNameMatcher.IsModelFound(modelName, allowedModels);
         }
     }
-} 
+}

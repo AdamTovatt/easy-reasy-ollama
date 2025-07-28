@@ -1,8 +1,8 @@
+using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Server.Providers;
 using EasyReasy.Ollama.Server.Services.Ollama;
 using EasyReasy.Ollama.Server.Tests.TestUtilities;
 using Microsoft.Extensions.Logging;
-using EasyReasy.Ollama.Server.Providers;
-using EasyReasy.EnvironmentVariables;
 
 namespace EasyReasy.Ollama.Server.Tests
 {

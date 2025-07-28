@@ -38,4 +38,4 @@ namespace EasyReasy.Ollama.Common.Internal
             writer.WriteStringValue(value.ToString());
         }
     }
-} 
+}

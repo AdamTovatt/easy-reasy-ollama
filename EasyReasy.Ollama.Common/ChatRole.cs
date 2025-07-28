@@ -1,6 +1,6 @@
+using EasyReasy.Ollama.Common.Internal;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using EasyReasy.Ollama.Common.Internal;
 
 namespace EasyReasy.Ollama.Common
 {
@@ -133,4 +133,4 @@ namespace EasyReasy.Ollama.Common
             return _value;
         }
     }
-} 
+}

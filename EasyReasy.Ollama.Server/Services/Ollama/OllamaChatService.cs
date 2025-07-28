@@ -1,11 +1,11 @@
+using EasyReasy.Ollama.Common;
+using EasyReasy.Ollama.Server.Extensions;
+using EasyReasy.Ollama.Server.Providers;
 using OllamaSharp.Models.Chat;
 using System.Runtime.CompilerServices;
-using EasyReasy.Ollama.Server.Providers;
-using EasyReasy.Ollama.Server.Extensions;
-using EasyReasy.Ollama.Common;
-using Message = EasyReasy.Ollama.Common.Message;
-using ChatRole = EasyReasy.Ollama.Common.ChatRole;
 using System.Text;
+using ChatRole = EasyReasy.Ollama.Common.ChatRole;
+using Message = EasyReasy.Ollama.Common.Message;
 
 namespace EasyReasy.Ollama.Server.Services.Ollama
 {
@@ -91,7 +91,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
             List<OllamaSharp.Models.Chat.Message> ollamaMessages = messages.ToOllamaSharp();
 
-            ChatRequest chatRequest = new ChatRequest
+            OllamaSharp.Models.Chat.ChatRequest chatRequest = new OllamaSharp.Models.Chat.ChatRequest
             {
                 Messages = ollamaMessages,
                 Tools = toolDefinitions?.ToOllamaTools(),

@@ -77,4 +77,4 @@ namespace EasyReasy.Ollama.Server.Extensions
             return messages.Select(m => m.ToCommon()).ToList();
         }
     }
-} 
+}

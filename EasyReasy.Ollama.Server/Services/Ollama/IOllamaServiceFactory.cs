@@ -54,4 +54,4 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <returns>A task that represents the asynchronous download operation.</returns>
         Task PullModelsAsync(CancellationToken cancellationToken = default);
     }
-} 
+}
