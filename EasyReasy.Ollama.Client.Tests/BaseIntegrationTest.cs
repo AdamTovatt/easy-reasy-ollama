@@ -1,5 +1,5 @@
+using EasyReasy.Ollama.Server;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace EasyReasy.Ollama.Client.Tests
 {
@@ -8,15 +8,14 @@ namespace EasyReasy.Ollama.Client.Tests
     /// </summary>
     public abstract class BaseIntegrationTest
     {
-        protected WebApplicationFactory<Program> Factory = null!;
-        protected HttpClient ServerClient = null!;
-        protected string BaseUrl = null!;
+        protected static WebApplicationFactory<Program> Factory = null!;
+        protected static HttpClient ServerClient = null!;
         protected OllamaClient? Client;
 
-        [TestInitialize]
-        public void Setup()
+        [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
+        public static void ClassSetup(TestContext context)
         {
-            // Add test environment variables
+            // Add test environment variables - must be set before creating the WebApplicationFactory
             Environment.SetEnvironmentVariable("OLLAMA_URL", "http://localhost:11434");
             Environment.SetEnvironmentVariable("TENANT_INFO_01", "test-tenant,test-api-key");
             Environment.SetEnvironmentVariable("ALLOWED_MODEL_01", "llama3.1");
@@ -24,35 +23,64 @@ namespace EasyReasy.Ollama.Client.Tests
 
             Factory = new WebApplicationFactory<Program>();
             ServerClient = Factory.CreateClient();
-            BaseUrl = ServerClient.BaseAddress?.ToString() ?? "http://localhost";
+        }
+
+        [ClassCleanup(InheritanceBehavior.BeforeEachDerivedClass)]
+        public static void ClassCleanup()
+        {
+            ServerClient?.Dispose();
+            Factory?.Dispose();
+        }
+
+        [TestInitialize]
+        public void Setup()
+        {
+            // Test-specific setup can go here if needed in the future
         }
 
         [TestCleanup]
         public void Cleanup()
         {
             Client?.Dispose();
-            ServerClient?.Dispose();
-            Factory?.Dispose();
         }
 
         /// <summary>
         /// Creates an authenticated client for testing.
         /// </summary>
         /// <returns>An authenticated OllamaClient instance.</returns>
-        protected async Task<OllamaClient> CreateAuthenticatedClientAsync()
+        protected static async Task<OllamaClient> CreateAuthenticatedClientAsync()
         {
-            Client = await OllamaClient.CreateAuthorizedAsync(BaseUrl, "test-api-key");
-            return Client;
+            if (ServerClient == null)
+            {
+                throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
+            }
+            return await OllamaClient.CreateAuthorizedAsync(ServerClient, "test-api-key");
         }
 
         /// <summary>
         /// Creates an unauthenticated client for testing.
         /// </summary>
         /// <returns>An unauthenticated OllamaClient instance.</returns>
-        protected OllamaClient CreateUnauthenticatedClient()
+        protected static OllamaClient CreateUnauthenticatedClient()
         {
-            Client = OllamaClient.CreateAsync(BaseUrl, "test-api-key");
-            return Client;
+            if (ServerClient == null)
+            {
+                throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
+            }
+            return OllamaClient.CreateUnauthorizedAsync(ServerClient, "test-api-key");
+        }
+
+        /// <summary>
+        /// Creates an unauthenticated client with invalid credentials for testing authentication failures.
+        /// </summary>
+        /// <returns>An OllamaClient instance that will fail authentication.</returns>
+        protected static OllamaClient CreateUnauthenticatedClientWithInvalidCredentials()
+        {
+            if (ServerClient == null)
+            {
+                throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
+            }
+            return OllamaClient.CreateUnauthorizedAsync(ServerClient, "invalid-api-key");
         }
     }
 }

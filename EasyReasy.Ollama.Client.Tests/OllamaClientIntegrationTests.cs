@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace EasyReasy.Ollama.Client.Tests
 {
     [TestClass]
@@ -8,7 +10,7 @@ namespace EasyReasy.Ollama.Client.Tests
         public async Task CreateAsync_ValidApiKey_CreatesClient()
         {
             // Act
-            OllamaClient client = OllamaClient.CreateAsync(BaseUrl, "test-api-key");
+            OllamaClient client = OllamaClient.CreateUnauthorizedAsync(ServerClient, "test-api-key");
 
             // Assert
             Assert.IsNotNull(client);
@@ -21,14 +23,14 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Act & Assert
             Assert.ThrowsException<ArgumentException>(() =>
-                OllamaClient.CreateAsync(BaseUrl, ""));
+                OllamaClient.CreateUnauthorizedAsync(ServerClient, ""));
         }
 
         [TestMethod]
         public async Task CreateAuthorizedAsync_ValidApiKey_CreatesAuthenticatedClient()
         {
             // Act
-            OllamaClient client = await OllamaClient.CreateAuthorizedAsync(BaseUrl, "test-api-key");
+            OllamaClient client = await OllamaClient.CreateAuthorizedAsync(ServerClient, "test-api-key");
 
             // Assert
             Assert.IsNotNull(client);
@@ -40,8 +42,17 @@ namespace EasyReasy.Ollama.Client.Tests
         public async Task CreateAuthorizedAsync_InvalidApiKey_ThrowsHttpRequestException()
         {
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(async () =>
-                await OllamaClient.CreateAuthorizedAsync(BaseUrl, "invalid-api-key"));
+            await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
+                await OllamaClient.CreateAuthorizedAsync(ServerClient, "invalid-api-key"));
+
+            try
+            {
+                await OllamaClient.CreateAuthorizedAsync(ServerClient, "invalid-api-key");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message); // To be able to inspect the message in the tests
+            }
         }
 
         [TestMethod]
@@ -64,11 +75,25 @@ namespace EasyReasy.Ollama.Client.Tests
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             // Act
             bool isAvailable = await client.IsModelAvailableAsync("llama3.1");
 
+            stopwatch.Stop();
+            Console.WriteLine($"Elapsed time 1: {stopwatch.ElapsedMilliseconds} ms");
+
             // Assert
             // Note: Result depends on whether the model is actually available in the test environment
+            Assert.IsInstanceOfType(isAvailable, typeof(bool));
+
+            // Test again to see if speed is increased
+            stopwatch = Stopwatch.StartNew();
+            isAvailable = await client.IsModelAvailableAsync("llama3.1");
+            stopwatch.Stop();
+
+            Console.WriteLine($"Elapsed time 1: {stopwatch.ElapsedMilliseconds} ms");
+
             Assert.IsInstanceOfType(isAvailable, typeof(bool));
         }
 

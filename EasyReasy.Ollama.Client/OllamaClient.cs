@@ -8,12 +8,8 @@ namespace EasyReasy.Ollama.Client
     /// </summary>
     public class OllamaClient : IOllamaClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _baseUrl;
-        private readonly string _apiKey;
+        private readonly AuthorizedHttpClient _authorizedHttpClient;
         private bool _disposed;
-        private bool _isAuthorized;
-        private DateTime? _tokenExpiresAt;
 
         /// <summary>
         /// Gets the chat client for handling chat operations.
@@ -26,118 +22,73 @@ namespace EasyReasy.Ollama.Client
         public IEmbeddingClient Embeddings { get; }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="OllamaClient"/> class.
+        /// </summary>
+        /// <param name="authorizedHttpClient">The authorized HTTP client to use for requests.</param>
+        private OllamaClient(AuthorizedHttpClient authorizedHttpClient)
+        {
+            _authorizedHttpClient = authorizedHttpClient ?? throw new ArgumentNullException(nameof(authorizedHttpClient));
+
+            Chat = new ChatClient(authorizedHttpClient.HttpClient, this);
+            Embeddings = new EmbeddingClient(authorizedHttpClient.HttpClient, this);
+        }
+
+        /// <summary>
         /// Ensures the client is authorized before making API calls.
         /// This method should be called by specialized clients before making requests.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         internal async Task EnsureAuthorizedForSpecializedClientsAsync(CancellationToken cancellationToken = default)
         {
-            await EnsureAuthorizedAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OllamaClient"/> class.
-        /// </summary>
-        /// <param name="baseUrl">The base URL of the Ollama server.</param>
-        /// <param name="apiKey">The API key for authentication.</param>
-        private OllamaClient(string baseUrl, string apiKey)
-        {
-            _baseUrl = baseUrl.TrimEnd('/');
-            _apiKey = apiKey;
-            _httpClient = new HttpClient();
-
-            Chat = new ChatClient(_httpClient, _baseUrl, this);
-            Embeddings = new EmbeddingClient(_httpClient, _baseUrl, this);
-        }
-
-        /// <summary>
-        /// Ensures the client is authorized and the token is not expired.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        private async Task EnsureAuthorizedAsync(CancellationToken cancellationToken = default)
-        {
-            // Check if we need to authorize or re-authorize
-            if (!_isAuthorized || IsTokenExpired())
-            {
-                await AuthorizeAsync(cancellationToken);
-            }
-        }
-
-        /// <summary>
-        /// Checks if the current token is expired.
-        /// </summary>
-        /// <returns>True if the token is expired or will expire within 5 minutes; otherwise, false.</returns>
-        private bool IsTokenExpired()
-        {
-            if (!_tokenExpiresAt.HasValue)
-                return true;
-
-            // Consider token expired if it expires within 5 minutes
-            return _tokenExpiresAt.Value <= DateTime.UtcNow.AddMinutes(5);
-        }
-
-        /// <summary>
-        /// Authorizes the client using the API key and obtains a JWT token.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <exception cref="HttpRequestException">Thrown when authentication fails.</exception>
-        private async Task AuthorizeAsync(CancellationToken cancellationToken = default)
-        {
-            ApiKeyAuthRequest authRequest = new ApiKeyAuthRequest(_apiKey);
-            string json = authRequest.ToJson();
-            StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await _httpClient.PostAsync($"{_baseUrl}/api/auth/apikey", content, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Authentication failed. Status: {response.StatusCode}, Content: {errorContent}");
-            }
-
-            string responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
-            AuthResponse authResponse = AuthResponse.FromJson(responseJson);
-
-            // Set the authorization header
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.Token);
-            _isAuthorized = true;
-            _tokenExpiresAt = DateTime.Parse(authResponse.ExpiresAt);
+            await _authorizedHttpClient.EnsureAuthorizedAsync(cancellationToken);
         }
 
         /// <summary>
         /// Creates an Ollama client using an API key without automatically authorizing.
         /// </summary>
-        /// <param name="baseUrl">The base URL of the Ollama server.</param>
+        /// <param name="httpClient">The HTTP client to use for requests.</param>
         /// <param name="apiKey">The API key for authentication.</param>
         /// <returns>An Ollama client that needs to be authorized before use.</returns>
-        public static OllamaClient CreateAsync(string baseUrl, string apiKey)
+        public static OllamaClient CreateUnauthorizedAsync(HttpClient httpClient, string apiKey)
         {
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
             if (string.IsNullOrWhiteSpace(apiKey))
             {
                 throw new ArgumentException("API key cannot be null or whitespace.", nameof(apiKey));
             }
 
-            return new OllamaClient(baseUrl, apiKey);
+            AuthorizedHttpClient authorizedHttpClient = new AuthorizedHttpClient(httpClient, apiKey);
+            return new OllamaClient(authorizedHttpClient);
         }
 
         /// <summary>
         /// Creates an authenticated Ollama client using an API key.
         /// </summary>
-        /// <param name="baseUrl">The base URL of the Ollama server.</param>
+        /// <param name="httpClient">The HTTP client to use for requests.</param>
         /// <param name="apiKey">The API key for authentication.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An authenticated Ollama client.</returns>
-        /// <exception cref="HttpRequestException">Thrown when authentication fails.</exception>
-        public static async Task<OllamaClient> CreateAuthorizedAsync(string baseUrl, string apiKey, CancellationToken cancellationToken = default)
+        /// <exception cref="UnauthorizedAccessException">Thrown when authentication fails.</exception>
+        public static async Task<OllamaClient> CreateAuthorizedAsync(HttpClient httpClient, string apiKey, CancellationToken cancellationToken = default)
         {
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
             if (string.IsNullOrWhiteSpace(apiKey))
             {
                 throw new ArgumentException("API key cannot be null or whitespace.", nameof(apiKey));
             }
 
-            OllamaClient client = new OllamaClient(baseUrl, apiKey);
-            await client.AuthorizeAsync(cancellationToken);
-            return client;
+            AuthorizedHttpClient authorizedHttpClient = new AuthorizedHttpClient(httpClient, apiKey);
+            await authorizedHttpClient.EnsureAuthorizedAsync(cancellationToken);
+
+            return new OllamaClient(authorizedHttpClient);
         }
 
         /// <summary>
@@ -147,16 +98,7 @@ namespace EasyReasy.Ollama.Client
         /// <returns>A list of model names that are available locally.</returns>
         public async Task<List<string>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
         {
-            await EnsureAuthorizedAsync(cancellationToken);
-
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_baseUrl}/api/ollama/models", cancellationToken);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                // Token might be expired, try to re-authorize once
-                await AuthorizeAsync(cancellationToken);
-                response = await _httpClient.GetAsync($"{_baseUrl}/api/ollama/models", cancellationToken);
-            }
+            HttpResponseMessage response = await _authorizedHttpClient.GetAsync("/api/ollama/models", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -177,16 +119,7 @@ namespace EasyReasy.Ollama.Client
         /// <returns>True if the model is available; otherwise, false.</returns>
         public async Task<bool> IsModelAvailableAsync(string modelName, CancellationToken cancellationToken = default)
         {
-            await EnsureAuthorizedAsync(cancellationToken);
-
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_baseUrl}/api/ollama/models/{Uri.EscapeDataString(modelName)}/available", cancellationToken);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                // Token might be expired, try to re-authorize once
-                await AuthorizeAsync(cancellationToken);
-                response = await _httpClient.GetAsync($"{_baseUrl}/api/ollama/models/{Uri.EscapeDataString(modelName)}/available", cancellationToken);
-            }
+            HttpResponseMessage response = await _authorizedHttpClient.GetAsync($"/api/ollama/models/{Uri.EscapeDataString(modelName)}/available", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -200,13 +133,13 @@ namespace EasyReasy.Ollama.Client
         }
 
         /// <summary>
-        /// Disposes of the HTTP client and releases resources.
+        /// Disposes of the client. Note that the HttpClient is not disposed as it's managed externally.
         /// </summary>
         public void Dispose()
         {
             if (!_disposed)
             {
-                _httpClient.Dispose();
+                _authorizedHttpClient.Dispose();
                 _disposed = true;
             }
         }

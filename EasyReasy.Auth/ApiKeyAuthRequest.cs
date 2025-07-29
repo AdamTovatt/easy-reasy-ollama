@@ -1,14 +1,12 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
-namespace EasyReasy.Ollama.Common
+namespace EasyReasy.Auth
 {
     /// <summary>
     /// Request model for API key authentication.
     /// </summary>
     public class ApiKeyAuthRequest
     {
-        [JsonPropertyName("apiKey")]
         public string ApiKey { get; }
 
         public ApiKeyAuthRequest(string apiKey)

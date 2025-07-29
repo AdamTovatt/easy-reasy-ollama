@@ -30,13 +30,13 @@
         /// </summary>
         /// <param name="name">The name of the tool.</param>
         /// <param name="description">The description of the tool.</param>
-        /// <param name="possibleParameters">The parameters that can be passed to the tool.</param>
+        /// <param name="parameters">The parameters that can be passed to the tool.</param>
         /// <param name="type">The type of the tool. Defaults to "function".</param>
-        public ToolDefinition(string name, string? description, List<PossibleParameter>? possibleParameters, string type = "function")
+        public ToolDefinition(string name, string? description, List<PossibleParameter>? parameters, string type = "function")
         {
             Name = name;
             Description = description;
-            Parameters = possibleParameters;
+            Parameters = parameters;
             Type = type;
         }
     }

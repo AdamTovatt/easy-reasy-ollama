@@ -116,10 +116,10 @@ namespace EasyReasy.Ollama.Client.Tests
         public async Task StreamChatAsync_Unauthenticated_ThrowsException()
         {
             // Arrange
-            OllamaClient client = CreateUnauthenticatedClient();
+            OllamaClient client = CreateUnauthenticatedClientWithInvalidCredentials();
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(async () =>
+            await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
             {
                 await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello"))
                 {
@@ -136,16 +136,15 @@ namespace EasyReasy.Ollama.Client.Tests
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromMilliseconds(100)); // Cancel after 100ms
 
-            // Act
-            List<ChatResponsePart> responses = new List<ChatResponsePart>();
-            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello", cts.Token))
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
             {
-                responses.Add(response);
-            }
-
-            // Assert
-            // The stream should be cancelled, so we might get some responses or none
-            // The important thing is that it doesn't throw an exception
+                List<ChatResponsePart> responses = new List<ChatResponsePart>();
+                await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello", cts.Token))
+                {
+                    responses.Add(response);
+                }
+            });
         }
     }
 }

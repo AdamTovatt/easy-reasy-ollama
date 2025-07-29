@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EasyReasy.Ollama.Common
 {
@@ -22,6 +23,7 @@ namespace EasyReasy.Ollama.Common
         /// </summary>
         /// <param name="message">The message content.</param>
         /// <param name="toolCall">The tool call.</param>
+        [JsonConstructor]
         public ChatResponsePart(string? message, ToolCall? toolCall)
         {
             Message = message;

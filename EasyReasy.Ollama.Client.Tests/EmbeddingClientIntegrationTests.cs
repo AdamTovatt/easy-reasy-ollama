@@ -86,11 +86,11 @@ namespace EasyReasy.Ollama.Client.Tests
         public async Task GetEmbeddingsAsync_Unauthenticated_ThrowsException()
         {
             // Arrange
-            OllamaClient client = CreateUnauthenticatedClient();
+            OllamaClient client = CreateUnauthenticatedClientWithInvalidCredentials();
             EmbeddingRequest request = new EmbeddingRequest("llama3.1", "Hello world");
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(async () =>
+            await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
                 await client.Embeddings.GetEmbeddingsAsync(request));
         }
 
@@ -104,7 +104,7 @@ namespace EasyReasy.Ollama.Client.Tests
             cts.CancelAfter(TimeSpan.FromMilliseconds(1)); // Cancel immediately
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
+            await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
                 await client.Embeddings.GetEmbeddingsAsync(request, cts.Token));
         }
 

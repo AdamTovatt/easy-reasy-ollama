@@ -8,19 +8,16 @@ namespace EasyReasy.Ollama.Client
     public class EmbeddingClient : IEmbeddingClient
     {
         private readonly HttpClient _httpClient;
-        private readonly string _baseUrl;
         private readonly OllamaClient _mainClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EmbeddingClient"/> class.
         /// </summary>
         /// <param name="httpClient">The HTTP client to use.</param>
-        /// <param name="baseUrl">The base URL of the Ollama server.</param>
         /// <param name="mainClient">The main Ollama client for authorization.</param>
-        public EmbeddingClient(HttpClient httpClient, string baseUrl, OllamaClient mainClient)
+        public EmbeddingClient(HttpClient httpClient, OllamaClient mainClient)
         {
             _httpClient = httpClient;
-            _baseUrl = baseUrl;
             _mainClient = mainClient;
         }
 
@@ -50,7 +47,7 @@ namespace EasyReasy.Ollama.Client
             string json = request.ToJson();
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync($"{_baseUrl}/api/embeddings", content, cancellationToken);
+            HttpResponseMessage response = await _httpClient.PostAsync("/api/embeddings", content, cancellationToken);
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
