@@ -41,6 +41,8 @@ app.UseEasyReasyAuth(); // Progressive delay enabled by default
 ```
 
 ### 3. Issue tokens
+
+#### Option A: Manual Token Creation **(Not recommended, see Option B for recommended way)**
 > You probably want to get an instance of IJWtTokenService via dependency injection in your controller class and create an endpoint in that is responsible for issuing tokens if they should be issued.
 ```csharp
 IJwtTokenService tokenService = new JwtTokenService(jwtSecret, issuer: "my-issuer");
@@ -51,6 +53,86 @@ string token = tokenService.CreateToken(
     roles: new[] { "admin", "user" },
     expiresAt: DateTime.UtcNow.AddHours(1));
 ```
+
+#### Option B: Automatic Auth Endpoints (Recommended)
+The library can automatically create authentication endpoints for you. First, implement the validation service:
+
+```csharp
+public class MyAuthService : IAuthRequestValidationService
+{
+    public async Task<AuthResponse?> ValidateApiKeyRequestAsync(ApiKeyAuthRequest request, IJwtTokenService jwtTokenService)
+    {
+        // Validate API key (e.g., check database, external service, etc.)
+        var user = await _userRepository.GetByApiKeyAsync(request.ApiKey);
+        if (user == null) return null;
+
+        // Create JWT token
+        DateTime expiresAt = DateTime.UtcNow.AddHours(1);
+        string token = jwtTokenService.CreateToken(
+            subject: user.Id,
+            authType: "apikey",
+            additionalClaims: new[] { new Claim("tenant_id", user.TenantId) },
+            roles: user.Roles.ToArray(),
+            expiresAt: expiresAt);
+
+        return new AuthResponse(token, expiresAt.ToString("o"));
+    }
+
+    public async Task<AuthResponse?> ValidateLoginRequestAsync(LoginAuthRequest request, IJwtTokenService jwtTokenService)
+    {
+        // Validate username/password (e.g., check database, hash password, etc.)
+        var user = await _userRepository.GetByUsernameAsync(request.Username);
+        if (user == null || !VerifyPassword(request.Password, user.PasswordHash)) 
+            return null;
+
+        // Create JWT token
+        DateTime expiresAt = DateTime.UtcNow.AddHours(1);
+        string token = jwtTokenService.CreateToken(
+            subject: user.Id,
+            authType: "user",
+            additionalClaims: new[] { new Claim("tenant_id", user.TenantId) },
+            roles: user.Roles.ToArray(),
+            expiresAt: expiresAt);
+
+        return new AuthResponse(token, expiresAt.ToString("o"));
+    }
+}
+```
+
+Then register the service and add endpoints in `Program.cs`:
+
+```csharp
+// Register your validation service
+builder.Services.AddAuthValidationService(new MyAuthService());
+
+// ... other configuration ...
+
+var app = builder.Build();
+
+// ... other configuration ...
+
+// Add auth endpoints (choose which ones you want)
+app.AddAuthEndpoints(
+    app.Services.GetRequiredService<IAuthRequestValidationService>(),
+    allowApiKeys: true,
+    allowUsernamePassword: true);
+
+// Or add specific endpoints individually:
+// app.AddApiAuthEndpoint(app.Services.GetRequiredService<IAuthRequestValidationService>());
+// app.AddLoginAuthEndpoint(app.Services.GetRequiredService<IAuthRequestValidationService>());
+
+app.MapControllers(); // This is probably here already
+// app.MapControllers(); is not specifically required by the auth library
+// it's just to show how the layout would probably look in Program.cs
+```
+
+This will automatically create:
+- `POST /api/auth/apikey` - For API key authentication
+- `POST /api/auth/login` - For username/password authentication
+
+Both endpoints return:
+- `200 OK` with `AuthResponse` (token + expiration) on success
+- `401 Unauthorized` on invalid credentials
 
 ### 4. Access claims and roles in controllers
 
@@ -110,12 +192,15 @@ The progressive delay middleware helps protect your API from brute-force attacks
 ## Core Features
 
 - **JWT token service**: Issue tokens with custom claims, roles, and optional issuer
+- **Automatic auth endpoints**: Create API key and username/password authentication endpoints with minimal code
+- **Flexible validation**: Implement `IAuthRequestValidationService` to handle any authentication logic (database, external APIs, etc.)
 - **Claims injection middleware**: Makes user/tenant IDs available in `HttpContext.Items`
 - **Role access**: Retrieve all roles for the current user via `GetRoles()`
 - **Claim access**: Retrieve any claim value by key or enum via `GetClaimValue()`
 - **Progressive delay middleware**: Slows repeated unauthorized requests from the same IP (first 10 have no delay, then 500ms per failure)
 - **Configurable issuer validation**: Pass `issuer: null` to disable
 - **Secret length enforcement**: Secret must be at least 32 bytes (256 bits) for HS256
+- **Async support**: All validation methods are async for database lookups and external API calls
 
 ## Error Handling
 
@@ -131,7 +216,7 @@ The progressive delay middleware helps protect your API from brute-force attacks
 
 ---
 
-For more details, see XML comments in the code or explore the source. This library is designed to be easy to use and secure by default.
+For more details, see XML comments in the code or explore the source. This library is designed to be easy to use and secure enough for most uses cases by default.
 
 ---
 

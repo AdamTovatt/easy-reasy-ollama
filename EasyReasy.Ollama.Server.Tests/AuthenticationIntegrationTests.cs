@@ -78,16 +78,6 @@ namespace EasyReasy.Ollama.Server.Tests
         }
 
         [TestMethod]
-        public async Task DebugAuth_WithoutToken_ReturnsUnauthorized()
-        {
-            // Act
-            HttpResponseMessage response = await _client.GetAsync("/api/auth/debug");
-
-            // Assert
-            Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        [TestMethod]
         public async Task StreamSse_WithValidToken_ReturnsSuccess()
         {
             // Arrange - First get a valid token

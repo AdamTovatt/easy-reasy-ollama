@@ -50,6 +50,10 @@ namespace EasyReasy.Ollama.Server
 
             // Register TenantService
             builder.Services.AddSingleton<ITenantService, EnvironmentVariablesTenantService>();
+            
+            // Register AuthValidationService (using the same instance as TenantService)
+            builder.Services.AddSingleton<IAuthRequestValidationService>(provider =>
+                (IAuthRequestValidationService)provider.GetRequiredService<ITenantService>());
 
             // Add JWT authentication and authorization
             string jwtSecret = EnvironmentVariables.JwtSigningSecret.GetValue();
@@ -68,6 +72,12 @@ namespace EasyReasy.Ollama.Server
 
             // UseEasyReasyAuth includes UseAuthentication() and UseAuthorization()
             app.UseEasyReasyAuth();
+
+            // Add auth endpoints
+            app.AddAuthEndpoints(
+                app.Services.GetRequiredService<IAuthRequestValidationService>(), 
+                allowApiKeys: true, 
+                allowUsernamePassword: false);
 
             app.MapControllers();
 

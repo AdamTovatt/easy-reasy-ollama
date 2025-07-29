@@ -49,7 +49,7 @@ namespace EasyReasy.Ollama.Client
         /// <param name="httpClient">The HTTP client to use for requests.</param>
         /// <param name="apiKey">The API key for authentication.</param>
         /// <returns>An Ollama client that needs to be authorized before use.</returns>
-        public static OllamaClient CreateUnauthorizedAsync(HttpClient httpClient, string apiKey)
+        public static OllamaClient CreateUnauthorized(HttpClient httpClient, string apiKey)
         {
             if (httpClient == null)
             {

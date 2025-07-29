@@ -77,5 +77,19 @@ namespace EasyReasy.Auth
 
             return services;
         }
+
+        /// <summary>
+        /// Registers an authentication request validation service for dependency injection.
+        /// </summary>
+        /// <param name="services">The service collection to add the validation service to.</param>
+        /// <param name="validationService">The validation service instance.</param>
+        /// <returns>The service collection for chaining.</returns>
+        public static IServiceCollection AddAuthValidationService(
+            this IServiceCollection services, 
+            IAuthRequestValidationService validationService)
+        {
+            services.AddSingleton(validationService);
+            return services;
+        }
     }
 }

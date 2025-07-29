@@ -67,7 +67,7 @@ namespace EasyReasy.Ollama.Client.Tests
             {
                 throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
             }
-            return OllamaClient.CreateUnauthorizedAsync(ServerClient, "test-api-key");
+            return OllamaClient.CreateUnauthorized(ServerClient, "test-api-key");
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace EasyReasy.Ollama.Client.Tests
             {
                 throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
             }
-            return OllamaClient.CreateUnauthorizedAsync(ServerClient, "invalid-api-key");
+            return OllamaClient.CreateUnauthorized(ServerClient, "invalid-api-key");
         }
     }
 }

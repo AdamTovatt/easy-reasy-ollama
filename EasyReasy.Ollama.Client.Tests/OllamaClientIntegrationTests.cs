@@ -7,10 +7,10 @@ namespace EasyReasy.Ollama.Client.Tests
     {
 
         [TestMethod]
-        public async Task CreateAsync_ValidApiKey_CreatesClient()
+        public void CreateAsync_ValidApiKey_CreatesClient()
         {
             // Act
-            OllamaClient client = OllamaClient.CreateUnauthorizedAsync(ServerClient, "test-api-key");
+            OllamaClient client = OllamaClient.CreateUnauthorized(ServerClient, "test-api-key");
 
             // Assert
             Assert.IsNotNull(client);
@@ -19,11 +19,11 @@ namespace EasyReasy.Ollama.Client.Tests
         }
 
         [TestMethod]
-        public async Task CreateAsync_InvalidApiKey_ThrowsArgumentException()
+        public void CreateAsync_InvalidApiKey_ThrowsArgumentException()
         {
             // Act & Assert
             Assert.ThrowsException<ArgumentException>(() =>
-                OllamaClient.CreateUnauthorizedAsync(ServerClient, ""));
+                OllamaClient.CreateUnauthorized(ServerClient, ""));
         }
 
         [TestMethod]
