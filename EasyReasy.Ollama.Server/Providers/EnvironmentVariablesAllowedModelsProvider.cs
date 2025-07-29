@@ -59,7 +59,7 @@ namespace EasyReasy.Ollama.Server.Providers
         private bool CheckIfModelAllowed(string modelName)
         {
             IEnumerable<string> allowedModels = GetAllowedModels();
-            return ModelNameMatcher.IsModelFound(modelName, allowedModels);
+            return ModelNameMatcher.IsModelFound(modelName, allowedModels, requireExactMatch: false);
         }
     }
 }

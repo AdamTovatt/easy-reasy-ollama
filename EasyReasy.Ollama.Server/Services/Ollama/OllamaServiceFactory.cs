@@ -107,31 +107,47 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
 
             _chatLogger.LogInformation($"Pulling model {modelName}");
 
-            int lastPercent = -1;
-            await foreach (PullModelResponse? response in modelResponseStream)
+            try
             {
-                if (response == null)
-                    continue;
-
-                if (!string.IsNullOrEmpty(response.Status) && response.Status.Any(c => char.IsNumber(c)))
+                int lastPercent = -1;
+                await foreach (PullModelResponse? response in modelResponseStream)
                 {
-                    int intPercentage = (int)response.Percent;
-
-                    if (intPercentage == lastPercent)
+                    if (response == null)
                         continue;
 
-                    string shortDigest = response.Digest;
-                    if (!string.IsNullOrEmpty(shortDigest) && shortDigest.StartsWith("sha256:") && shortDigest.Length > 15)
-                        shortDigest = shortDigest.Substring(7, 12);
+                    if (!string.IsNullOrEmpty(response.Status) && response.Status.Any(c => char.IsNumber(c)))
+                    {
+                        int intPercentage = (int)response.Percent;
 
-                    // Format percent as right-aligned, space-padded 3-character string (e.g., ' 0%', '10%', '99%')
-                    string percentString = intPercentage.ToString().PadLeft(2) + "%";
-                    _chatLogger.LogInformation($"{modelName} ({shortDigest}): {percentString} ({response.Completed} / {response.Total})");
+                        if (intPercentage == lastPercent)
+                            continue;
+
+                        string shortDigest = response.Digest;
+                        if (!string.IsNullOrEmpty(shortDigest) && shortDigest.StartsWith("sha256:") && shortDigest.Length > 15)
+                            shortDigest = shortDigest.Substring(7, 12);
+
+                        // Format percent as right-aligned, space-padded 3-character string (e.g., ' 0%', '10%', '99%')
+                        string percentString = intPercentage.ToString().PadLeft(2) + "%";
+                        _chatLogger.LogInformation($"{modelName} ({shortDigest}): {percentString} ({response.Completed} / {response.Total})");
+                    }
+                    else
+                    {
+                        _chatLogger.LogInformation($"{response.Status} for {modelName}");
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                if (exception is OllamaSharp.Models.Exceptions.OllamaException)
+                {
+                    _chatLogger.LogInformation($"Model name \"{modelName}\" caused error from Ollama: {exception.Message}");
                 }
                 else
                 {
-                    _chatLogger.LogInformation($"{response.Status} for {modelName}");
+                    _chatLogger.LogInformation($"Model name \"{modelName}\" caused exception: {exception.Message}");
                 }
+
+                throw new Exception($"Error when loading model \"{modelName}\": {exception.Message}");
             }
         }
 

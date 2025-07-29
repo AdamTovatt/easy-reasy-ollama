@@ -50,7 +50,7 @@ namespace EasyReasy.Ollama.Server
 
             // Register TenantService
             builder.Services.AddSingleton<ITenantService, EnvironmentVariablesTenantService>();
-            
+
             // Register AuthValidationService (using the same instance as TenantService)
             builder.Services.AddSingleton<IAuthRequestValidationService>(provider =>
                 (IAuthRequestValidationService)provider.GetRequiredService<ITenantService>());
@@ -75,11 +75,14 @@ namespace EasyReasy.Ollama.Server
 
             // Add auth endpoints
             app.AddAuthEndpoints(
-                app.Services.GetRequiredService<IAuthRequestValidationService>(), 
-                allowApiKeys: true, 
+                app.Services.GetRequiredService<IAuthRequestValidationService>(),
+                allowApiKeys: true,
                 allowUsernamePassword: false);
 
             app.MapControllers();
+
+            IOllamaServiceFactory ollamaServiceFactory = app.Services.GetRequiredService<IOllamaServiceFactory>();
+            await ollamaServiceFactory.PullModelsAsync();
 
             app.Run();
         }

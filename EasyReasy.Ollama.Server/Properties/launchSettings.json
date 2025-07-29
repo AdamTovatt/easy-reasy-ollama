@@ -13,7 +13,7 @@
         "TENANT_INFO_01": "1,test",
         "ALLOWED_MODEL_01": "gemma3",
         "ALLOWED_MODEL_02": "nomic-embed-text",
-        "ALLOWED_MODEL_03=llama3.1": "llama3.1:8b",
+        "ALLOWED_MODEL_03": "llama3.1:8b",
         "JWT_SIGNING_SECRET": "this-is-a-test-signing-secret-that-should-be-replaced-if-this-is-hosted-for-real"
       }
     }

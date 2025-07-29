@@ -2,13 +2,14 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ollama Chat</title>
   <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <button id="theme-toggle" title="Toggle dark/light mode" style="position: absolute; top: 1.5rem; right: 2rem; z-index: 10; background: none; border: none; font-size: 1.5rem; cursor: pointer;">
-    <span id="theme-icon">🌙</span>
-  </button>
+  
+  <!-- Login Section -->
   <div id="login-section" class="cool-border">
     <form id="login-form" class="login-form">
       <h1>Ollama Chat</h1>
@@ -18,17 +19,35 @@
       <div id="login-error" class="error-message" style="display: none;"></div>
     </form>
   </div>
-  <div id="chat-section" class="cool-border chat-container" style="display: none;">
+  
+  <!-- Chat Section -->
+  <div id="chat-section" class="chat-layout" style="display: none;">
     <div class="chat-header">
-      <h2>Ollama Chat</h2>
-      <button id="logout-btn">Logout</button>
+      <div class="chat-controls">
+        <select id="model-select" class="model-select">
+          <option value="">Loading models...</option>
+        </select>
+        <div class="user-controls">
+          <button id="theme-toggle" title="Toggle dark/light mode" class="theme-toggle">
+            <span id="theme-icon">🌙</span>
+          </button>
+          <button id="logout-btn">Logout</button>
+        </div>
+      </div>
     </div>
-    <div id="chat-output" class="chat-output"></div>
-    <form id="chat-form" class="chat-form">
-      <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
-      <button type="submit">Send</button>
-    </form>
+    
+    <div class="chat-main">
+      <div id="chat-output" class="chat-output"></div>
+    </div>
+    
+    <div class="chat-input-container">
+      <form id="chat-form" class="chat-form">
+        <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </div>
+  
   <script src="/script.js"></script>
   <script>
     // Theme toggle logic
