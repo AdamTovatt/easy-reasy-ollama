@@ -31,6 +31,7 @@ namespace EasyReasy.Ollama.Server.Controllers
             try
             {
                  Response.ContentType = "text/event-stream";
+                 Response.Headers.Add("X-Accel-Buffering", "no");
 
                 IOllamaChatService chatService = _ollamaServiceFactory.GetChatService(request.ModelName);
                 await foreach (ChatResponsePart responsePart in chatService.GetResponseAsync(request.Messages, request.ToolDefinitions, cancellationToken))
