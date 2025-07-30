@@ -264,6 +264,51 @@ The server uses the [EasyReasy.Auth](../EasyReasy.Auth/README.md) library for:
 - Claims injection middleware
 - Progressive delay protection
 
+## Nginx and SSE
+
+When deploying behind nginx proxies, Server-Sent Events (SSE) may not work properly due to nginx buffering. The server automatically adds the `X-Accel-Buffering: no` header to SSE responses, but you must also configure nginx to respect this header.
+
+### Nginx Configuration
+
+For each nginx instance in your proxy chain, add the following configuration to your location block:
+
+```nginx
+location /api/chat/stream {
+    proxy_pass http://upstream-server;
+    proxy_set_header X-Accel-Buffering no;
+    proxy_buffering off;
+    proxy_cache off;
+}
+```
+
+### Key Settings
+
+- `proxy_set_header X-Accel-Buffering no`: Tells nginx to disable buffering for this response
+- `proxy_buffering off`: Disables response buffering
+- `proxy_cache off`: Disables caching for this location
+
+### Reloading Nginx
+
+After making configuration changes, reload nginx:
+
+```bash
+sudo nginx -s reload
+```
+
+Or restart the service:
+
+```bash
+sudo systemctl reload nginx
+```
+
+### Testing Configuration
+
+Validate your nginx configuration before reloading:
+
+```bash
+sudo nginx -t
+```
+
 ## Client Libraries
 
 The project includes client libraries for easy integration:
