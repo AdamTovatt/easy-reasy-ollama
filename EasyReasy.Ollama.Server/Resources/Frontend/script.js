@@ -146,11 +146,29 @@ document.addEventListener('DOMContentLoaded', function() {
         hideLoginError();
     });
 
+    // Handle keydown events for the textarea
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Trigger the submit logic directly instead of dispatching an event
+            const text = chatInput.value.trim();
+            if (text) {
+                handleChatSubmission(text);
+            }
+        }
+    });
+
     // Handle chat form submission
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const text = chatInput.value.trim();
         if (!text) return;
+        
+        await handleChatSubmission(text);
+    });
+
+    // Extract the chat submission logic into a separate function
+    async function handleChatSubmission(text) {
         
         if (!authToken) {
             showLoginError('Please login first');
@@ -303,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Streaming error:', error);
             showLoginError('Connection failed. Please try again.');
         }
-    });
+    }
 
     function showLoginError(message) {
         loginError.textContent = message;
