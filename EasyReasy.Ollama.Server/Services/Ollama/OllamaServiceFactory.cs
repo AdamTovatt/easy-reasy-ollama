@@ -81,8 +81,17 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         /// <returns>A list of model names that are available locally.</returns>
         public async Task<List<string>> GetAvailableModelsAsync(CancellationToken cancellationToken = default)
         {
+            List<string> result = new List<string>();
+
             IEnumerable<Model> models = await _sharedClient.ListLocalModelsAsync(cancellationToken).ConfigureAwait(false);
-            return models.Select(model => model.Name).ToList();
+
+            foreach (Model model in models)
+            {
+                if (_allowedModelsProvider.IsModelAllowed(model.Name))
+                    result.Add(model.Name);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -161,7 +170,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
         public async Task<bool> IsModelAvailableAsync(string modelName, CancellationToken cancellationToken = default)
         {
             List<string> availableModels = await GetAvailableModelsAsync(cancellationToken).ConfigureAwait(false);
-            return ModelNameMatcher.IsModelFound(modelName, availableModels);
+            return ModelNameMatcher.IsModelFound(modelName, availableModels) && _allowedModelsProvider.IsModelAllowed(modelName);
         }
 
         /// <summary>
