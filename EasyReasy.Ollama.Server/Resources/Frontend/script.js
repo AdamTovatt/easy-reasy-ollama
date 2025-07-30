@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!authToken) return;
 
         try {
-            const response = await fetch('/api/ollama/models', {
+            const response = await fetch('api/ollama/models', {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('/api/auth/apikey', {
+            const response = await fetch('api/auth/apikey', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             // Use the proper ChatController endpoint
-            const response = await fetch('/api/chat/stream', {
+            const response = await fetch('api/chat/stream', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
