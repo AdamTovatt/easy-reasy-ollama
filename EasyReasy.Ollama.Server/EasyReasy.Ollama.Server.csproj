@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="EasyReasy" Version="1.0.0" />
+    <PackageReference Include="EasyReasy.Auth" Version="1.0.0" />
     <PackageReference Include="EasyReasy.EnvironmentVariables" Version="1.1.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.13.0" />
     <PackageReference Include="OllamaSharp" Version="5.3.1" />
@@ -28,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EasyReasy.Auth\EasyReasy.Auth.csproj" />
     <ProjectReference Include="..\EasyReasy.Ollama.Common\EasyReasy.Ollama.Common.csproj" />
   </ItemGroup>
 

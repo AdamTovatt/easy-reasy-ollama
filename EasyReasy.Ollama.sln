@@ -15,10 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyReasy.Ollama.Common.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyReasy.Ollama.Server.Tests", "EasyReasy.Ollama.Server.Tests\EasyReasy.Ollama.Server.Tests.csproj", "{4D59DB4D-75EB-4C6F-BF86-3DDC6A268752}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyReasy.Auth", "EasyReasy.Auth\EasyReasy.Auth.csproj", "{008474F3-A9FC-49D2-9ED1-A52EDF360D63}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyReasy.Auth.Tests", "EasyReasy.Auth.Tests\EasyReasy.Auth.Tests.csproj", "{04F7588F-9A64-4565-B059-8F3AFA654461}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,14 +45,6 @@ Global
 		{4D59DB4D-75EB-4C6F-BF86-3DDC6A268752}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D59DB4D-75EB-4C6F-BF86-3DDC6A268752}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D59DB4D-75EB-4C6F-BF86-3DDC6A268752}.Release|Any CPU.Build.0 = Release|Any CPU
-		{008474F3-A9FC-49D2-9ED1-A52EDF360D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{008474F3-A9FC-49D2-9ED1-A52EDF360D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{008474F3-A9FC-49D2-9ED1-A52EDF360D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{008474F3-A9FC-49D2-9ED1-A52EDF360D63}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04F7588F-9A64-4565-B059-8F3AFA654461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04F7588F-9A64-4565-B059-8F3AFA654461}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04F7588F-9A64-4565-B059-8F3AFA654461}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04F7588F-9A64-4565-B059-8F3AFA654461}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
