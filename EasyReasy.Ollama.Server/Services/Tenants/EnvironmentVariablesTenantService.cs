@@ -54,6 +54,8 @@ namespace EasyReasy.Ollama.Server.Services.Tenants
         /// <inheritdoc />
         public async Task<AuthResponse?> ValidateApiKeyRequestAsync(ApiKeyAuthRequest request, IJwtTokenService jwtTokenService)
         {
+            await Task.CompletedTask;
+
             TenantInfo? tenant = GetTenantInfoByApiKey(request.ApiKey);
             if (tenant == null) return null;
 
@@ -71,6 +73,8 @@ namespace EasyReasy.Ollama.Server.Services.Tenants
         /// <inheritdoc />
         public async Task<AuthResponse?> ValidateLoginRequestAsync(LoginAuthRequest request, IJwtTokenService jwtTokenService)
         {
+            await Task.CompletedTask;
+
             // Login authentication not implemented in this project
             throw new NotImplementedException("Login authentication not implemented in this project");
         }
