@@ -79,7 +79,7 @@ namespace EasyReasy.Ollama.Client
             string json = request.ToJson();
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync("/api/chat/stream", content, cancellationToken);
+            HttpResponseMessage response = await _httpClient.PostAsync("api/chat/stream", content, cancellationToken);
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {

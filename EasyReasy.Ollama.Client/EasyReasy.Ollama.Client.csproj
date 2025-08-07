@@ -17,6 +17,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageIcon>BaseIcon.png</PackageIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <VersionPrefix>1.0.1</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EasyReasy.Auth" Version="1.0.0" />
+    <PackageReference Include="EasyReasy.Auth.Client" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

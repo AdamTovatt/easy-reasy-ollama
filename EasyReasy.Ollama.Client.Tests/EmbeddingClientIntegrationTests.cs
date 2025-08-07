@@ -11,7 +11,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", "Hello world");
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, "Hello world");
 
             // Act
             EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync(request);
@@ -29,7 +29,7 @@ namespace EasyReasy.Ollama.Client.Tests
             OllamaClient client = await CreateAuthenticatedClientAsync();
 
             // Act
-            EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync("llama3.1", "Hello world");
+            EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync(embeddingModelName, "Hello world");
 
             // Assert
             Assert.IsNotNull(response);
@@ -42,7 +42,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", "");
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, "");
 
             // Act
             EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync(request);
@@ -59,7 +59,7 @@ namespace EasyReasy.Ollama.Client.Tests
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
             string longText = new string('a', 1000); // 1000 character text
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", longText);
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, longText);
 
             // Act
             EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync(request);
@@ -87,7 +87,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = CreateUnauthenticatedClientWithInvalidCredentials();
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", "Hello world");
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, "Hello world");
 
             // Act & Assert
             await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
@@ -99,7 +99,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", "Hello world");
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, "Hello world");
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromMilliseconds(1)); // Cancel immediately
 
@@ -113,7 +113,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            EmbeddingRequest request = new EmbeddingRequest("llama3.1", "Hello world");
+            EmbeddingRequest request = new EmbeddingRequest(embeddingModelName, "Hello world");
 
             // Act
             EmbeddingResponse response = await client.Embeddings.GetEmbeddingsAsync(request);
@@ -134,8 +134,8 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            EmbeddingRequest request1 = new EmbeddingRequest("llama3.1", "Hello world");
-            EmbeddingRequest request2 = new EmbeddingRequest("llama3.1", "Hello world");
+            EmbeddingRequest request1 = new EmbeddingRequest(embeddingModelName, "Hello world");
+            EmbeddingRequest request2 = new EmbeddingRequest(embeddingModelName, "Hello world");
 
             // Act
             EmbeddingResponse response1 = await client.Embeddings.GetEmbeddingsAsync(request1);

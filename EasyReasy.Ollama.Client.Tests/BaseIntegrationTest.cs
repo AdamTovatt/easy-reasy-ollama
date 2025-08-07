@@ -12,13 +12,17 @@ namespace EasyReasy.Ollama.Client.Tests
         protected static HttpClient ServerClient = null!;
         protected OllamaClient? Client;
 
+        protected const string chatTestModelName = "gemma3:1b";
+        protected const string embeddingModelName = "nomic-embed-text";
+
         [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
         public static void ClassSetup(TestContext context)
         {
             // Add test environment variables - must be set before creating the WebApplicationFactory
             Environment.SetEnvironmentVariable("OLLAMA_URL", "http://localhost:11434");
             Environment.SetEnvironmentVariable("TENANT_INFO_01", "test-tenant,test-api-key");
-            Environment.SetEnvironmentVariable("ALLOWED_MODEL_01", "llama3.1");
+            Environment.SetEnvironmentVariable("ALLOWED_MODEL_01", chatTestModelName);
+            Environment.SetEnvironmentVariable("ALLOWED_MODEL_02", embeddingModelName);
             Environment.SetEnvironmentVariable("JWT_SIGNING_SECRET", "this-is-a-test-signing-secret-that-should-be-replaced-if-this-is-hosted-for-real");
 
             Factory = new WebApplicationFactory<Program>();

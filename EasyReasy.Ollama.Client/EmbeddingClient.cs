@@ -47,7 +47,7 @@ namespace EasyReasy.Ollama.Client
             string json = request.ToJson();
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync("/api/embeddings", content, cancellationToken);
+            HttpResponseMessage response = await _httpClient.PostAsync("api/embeddings", content, cancellationToken);
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {

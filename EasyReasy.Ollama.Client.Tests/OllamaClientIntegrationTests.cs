@@ -78,7 +78,7 @@ namespace EasyReasy.Ollama.Client.Tests
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Act
-            bool isAvailable = await client.IsModelAvailableAsync("llama3.1");
+            bool isAvailable = await client.IsModelAvailableAsync(chatTestModelName);
 
             stopwatch.Stop();
             Console.WriteLine($"Elapsed time 1: {stopwatch.ElapsedMilliseconds} ms");
@@ -89,7 +89,7 @@ namespace EasyReasy.Ollama.Client.Tests
 
             // Test again to see if speed is increased
             stopwatch = Stopwatch.StartNew();
-            isAvailable = await client.IsModelAvailableAsync("llama3.1");
+            isAvailable = await client.IsModelAvailableAsync(chatTestModelName);
             stopwatch.Stop();
 
             Console.WriteLine($"Elapsed time 1: {stopwatch.ElapsedMilliseconds} ms");

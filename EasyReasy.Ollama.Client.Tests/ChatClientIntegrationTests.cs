@@ -14,7 +14,7 @@ namespace EasyReasy.Ollama.Client.Tests
 
             // Act
             List<ChatResponsePart> responses = new List<ChatResponsePart>();
-            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello"))
+            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync(chatTestModelName, "Hello"))
             {
                 responses.Add(response);
                 // Break after first response to avoid long-running test
@@ -38,7 +38,7 @@ namespace EasyReasy.Ollama.Client.Tests
 
             // Act
             List<ChatResponsePart> responses = new List<ChatResponsePart>();
-            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", messages))
+            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync(chatTestModelName, messages))
             {
                 responses.Add(response);
                 // Break after first response to avoid long-running test
@@ -65,7 +65,7 @@ namespace EasyReasy.Ollama.Client.Tests
 
             // Act
             List<ChatResponsePart> responses = new List<ChatResponsePart>();
-            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", messages, tools))
+            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync(chatTestModelName, messages, tools))
             {
                 responses.Add(response);
                 // Break after first response to avoid long-running test
@@ -81,7 +81,7 @@ namespace EasyReasy.Ollama.Client.Tests
         {
             // Arrange
             OllamaClient client = await CreateAuthenticatedClientAsync();
-            ChatRequest request = new ChatRequest("llama3.1", new List<Message> { new Message(ChatRole.User, "Hello") });
+            ChatRequest request = new ChatRequest(chatTestModelName, new List<Message> { new Message(ChatRole.User, "Hello") });
 
             // Act
             List<ChatResponsePart> responses = new List<ChatResponsePart>();
@@ -121,7 +121,7 @@ namespace EasyReasy.Ollama.Client.Tests
             // Act & Assert
             await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
             {
-                await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello"))
+                await foreach (ChatResponsePart response in client.Chat.StreamChatAsync(chatTestModelName, "Hello"))
                 {
                     // This should throw before yielding any responses
                 }
@@ -140,7 +140,7 @@ namespace EasyReasy.Ollama.Client.Tests
             await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
             {
                 List<ChatResponsePart> responses = new List<ChatResponsePart>();
-                await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", "Hello", cts.Token))
+                await foreach (ChatResponsePart response in client.Chat.StreamChatAsync(chatTestModelName, "Hello", cts.Token))
                 {
                     responses.Add(response);
                 }
