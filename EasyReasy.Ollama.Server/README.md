@@ -19,7 +19,7 @@ A secure .NET API server that provides a RESTful interface to Ollama, with built
 ## Installation via script
 Run this script to install the server:
 ```bash
-wget -qO /tmp/install.sh https://raw.githubusercontent.com/AdamTovatt/easy-reasy-ollama/refs/heads/master/EasyReasy.Ollama.Server/install_script_.sh && sudo bash /tmp/install.sh
+wget -qO /tmp/install.sh https://raw.githubusercontent.com/AdamTovatt/easy-reasy-ollama/refs/heads/master/EasyReasy.Ollama.Server/install_script.sh && sudo bash /tmp/install.sh
 ```
 
 You can now configure the service:
