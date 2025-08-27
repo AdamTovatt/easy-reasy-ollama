@@ -103,6 +103,7 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
             IAsyncEnumerable<ChatResponseStream?> result = _client.ChatAsync(chatRequest, cancellationToken);
 
             StringBuilder? toolCallJsonBuilder = null;
+            bool didFindFullToolCall = false;
 
             await foreach (ChatResponseStream? message in result.ConfigureAwait(false))
             {
@@ -115,37 +116,54 @@ namespace EasyReasy.Ollama.Server.Services.Ollama
                     // Start collecting tool call JSON
                     if (toolCallJsonBuilder == null)
                     {
-                        string? toolName = message.Message.ToolCalls.First().Function?.Name;
+                        OllamaSharp.Models.Chat.Message.ToolCall firstToolCall = message.Message.ToolCalls.First();
 
-                        if (toolName == null)
-                            throw new Exception($"Model failed to specify tool name in a tool call");
+                        if (firstToolCall.Function != null && firstToolCall.Function.Arguments != null && firstToolCall.Function.Name != null)
+                        {
+                            didFindFullToolCall = true;
+                            yield return new ChatResponsePart(firstToolCall.ToCommon());
+                        }
 
-                        // Add the start of the json before
-                        toolCallJsonBuilder = new StringBuilder($"{{\"function\":{{\"index\":null,\"name\":\"{toolName}");
+                        if (!didFindFullToolCall)
+                        {
+                            string? toolName = firstToolCall.Function?.Name;
+
+                            if (toolName == null)
+                                throw new Exception($"Model failed to specify tool name in a tool call");
+
+                            // Add the start of the json before
+                            toolCallJsonBuilder = new StringBuilder($"{{\"function\":{{\"index\":null,\"name\":\"{toolName}");
+                        }
                     }
 
-                    // Add the tool call content to our builder
-                    if (!string.IsNullOrEmpty(message.Message.Content))
+                    if (!didFindFullToolCall)
                     {
-                        toolCallJsonBuilder.Append(message.Message.Content);
+                        // Add the tool call content to our builder
+                        if (!string.IsNullOrEmpty(message.Message.Content) && toolCallJsonBuilder != null)
+                        {
+                            toolCallJsonBuilder.Append(message.Message.Content);
+                        }
                     }
                 }
                 else if (message.Message.Content != null)
                 {
                     if (toolCallJsonBuilder != null)
                     {
-                        toolCallJsonBuilder.Append(message.Message.Content);
-
-                        if (message.Done)
+                        if (!didFindFullToolCall)
                         {
-                            // Add closing "}" after the json since we added a start json snippet containing "{"
-                            string cleanedJson = _jsonCleaner.CleanJson($"{toolCallJsonBuilder}}}");
-                            ToolCall? toolCall = ToolCall.FromJson(cleanedJson, throwOnError: false);
+                            toolCallJsonBuilder.Append(message.Message.Content);
 
-                            if (toolCall == null)
-                                throw new Exception($"Model provided invalid tool call json: {toolCallJsonBuilder}");
+                            if (message.Done)
+                            {
+                                // Add closing "}" after the json since we added a start json snippet containing "{"
+                                string cleanedJson = _jsonCleaner.CleanJson($"{toolCallJsonBuilder}}}");
+                                ToolCall? toolCall = ToolCall.FromJson(cleanedJson, throwOnError: false);
 
-                            yield return new ChatResponsePart(toolCall);
+                                if (toolCall == null)
+                                    throw new Exception($"Model provided invalid tool call json: {toolCallJsonBuilder}");
+
+                                yield return new ChatResponsePart(toolCall);
+                            }
                         }
                     }
                     else

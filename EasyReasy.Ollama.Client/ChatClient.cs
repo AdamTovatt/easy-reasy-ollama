@@ -80,28 +80,101 @@ namespace EasyReasy.Ollama.Client
             string json = request.ToJson();
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/chat/stream")
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "api/chat/stream")
             {
                 Content = content
             };
 
-            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Re-throw TaskCanceledException to preserve cancellation semantics
+                throw;
+            }
+            catch (HttpRequestException httpEx) when (httpEx.InnerException is TaskCanceledException)
+            {
+                // Unwrap TaskCanceledException from HttpRequestException
+                throw httpEx.InnerException;
+            }
+            catch (HttpRequestException httpEx) when (cancellationToken.IsCancellationRequested)
+            {
+                // If cancellation is requested and we get an HttpRequestException, 
+                // it's likely due to cancellation, so throw TaskCanceledException
+                throw new TaskCanceledException("Request was cancelled", httpEx, cancellationToken);
+            }
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 // Token might be expired, but we can't easily retry with streaming
                 // The main client should handle authorization before calling this
-                string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                string errorContent;
+                try
+                {
+                    errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    throw;
+                }
+                catch (HttpRequestException httpEx) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException("Request was cancelled", httpEx, cancellationToken);
+                }
+
                 throw new HttpRequestException($"Authentication failed. Status: {response.StatusCode}, Content: {errorContent}");
             }
 
             if (!response.IsSuccessStatusCode)
             {
-                string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Failed to stream chat. Status: {response.StatusCode}, Content: {errorContent}");
+                string errorContent;
+                try
+                {
+                    errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    throw;
+                }
+                catch (HttpRequestException httpEx) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException("Request was cancelled", httpEx, cancellationToken);
+                }
+
+                if (string.IsNullOrEmpty(errorContent))
+                {
+                    errorContent = "(NO CONTENT AVAILABLE)";
+                }
+
+                string requestUri = response.RequestMessage?.RequestUri?.ToString() ?? "(UNKNOWN REQUEST URI)";
+
+                throw new HttpRequestException($"Failed to stream chat from {requestUri}. Status: {response.StatusCode}, Content: {errorContent}");
             }
 
-            Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            Stream stream;
+            try
+            {
+                stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Re-throw TaskCanceledException to preserve cancellation semantics
+                throw;
+            }
+            catch (HttpRequestException httpEx) when (httpEx.InnerException is TaskCanceledException)
+            {
+                // Unwrap TaskCanceledException from HttpRequestException
+                throw httpEx.InnerException;
+            }
+            catch (HttpRequestException httpEx) when (cancellationToken.IsCancellationRequested)
+            {
+                // If cancellation is requested and we get an HttpRequestException, 
+                // it's likely due to cancellation, so throw TaskCanceledException
+                throw new TaskCanceledException("Request was cancelled", httpEx, cancellationToken);
+            }
 
             byte[] buffer = new byte[4096];
             StringBuilder lineBuilder = new StringBuilder();

@@ -27,6 +27,9 @@ namespace EasyReasy.Ollama.Server.Extensions
                     if (parameter.Required)
                         required.Add(parameter.ParameterName);
                 }
+
+                parameters.Properties = properties;
+                parameters.Required = required;
             }
 
             return new Tool()

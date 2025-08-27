@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EasyReasy" Version="1.0.0" />
-    <PackageReference Include="EasyReasy.EnvironmentVariables" Version="1.1.0" />
+    <PackageReference Include="EasyReasy" Version="1.0.2" />
+    <PackageReference Include="EasyReasy.EnvironmentVariables" Version="1.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.18" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />

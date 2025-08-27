@@ -213,5 +213,24 @@ I would call the tool with this function call to get a response. The output of t
             Assert.AreEqual("Get current weather", result.Function.Name);
             Assert.AreEqual("London", result.Function.Arguments?["city"]?.ToString());
         }
+
+        [TestMethod]
+        public void FromJson_WithIncompleteJson_ShouldCleanCorrectly()
+        {
+            // Arrange
+            const string dirtyJson = @"{""function"":{""index"":null,""name"":""GetCurrentWeather}";
+
+            const string cleanJson = @"{""function"":{""index"":null,""name"":""GetCurrentWeather""}}";
+
+            // Act
+            string cleanedJson = _jsonCleaner.CleanJson(dirtyJson);
+            ToolCall result = ToolCall.FromJson(cleanedJson);
+
+            // Assert
+            Assert.AreEqual(cleanJson, cleanedJson, $"The json should be cleaned to result in\n{cleanJson} but it was actually\n{cleanedJson}");
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Function);
+            Assert.AreEqual("GetCurrentWeather", result.Function.Name);
+        }
     }
 }

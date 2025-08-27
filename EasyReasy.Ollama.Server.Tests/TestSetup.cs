@@ -32,7 +32,7 @@ namespace EasyReasy.Ollama.Server.Tests
             try
             {
                 // Load environment variables
-                EnvironmentVariableHelper.LoadVariablesFromFile("env.txt");
+                EnvironmentVariableHelper.LoadVariablesFromFile("..\\..\\env.txt");
                 EnvironmentVariableHelper.ValidateVariableNamesIn(typeof(OllamaIntegrationEnvironmentVariables));
 
                 string ollamaUrl = OllamaIntegrationEnvironmentVariables.OllamaUrl.GetValue();
