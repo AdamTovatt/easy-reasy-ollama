@@ -97,6 +97,57 @@ namespace EasyReasy.Ollama.Client.Tests
         }
 
         [TestMethod]
+        public async Task StreamChatAsync_ActuallyStreamsOverTime()
+        {
+            // Arrange
+            OllamaClient client = await CreateAuthenticatedClientAsync();
+            string prompt = "Write a short story about a cat. Make it at least 3 sentences long.";
+
+            // Act
+            List<(ChatResponsePart Response, DateTime Timestamp)> responsesWithTimestamps = new List<(ChatResponsePart, DateTime)>();
+            DateTime startTime = DateTime.UtcNow;
+
+            Console.WriteLine($"Starting at - {startTime.Hour}:{startTime.Minute}:{startTime.Second}:{startTime.Millisecond}");
+
+            await foreach (ChatResponsePart response in client.Chat.StreamChatAsync("llama3.1", prompt))
+            {
+                DateTime currentTime = DateTime.UtcNow;
+                responsesWithTimestamps.Add((response, currentTime));
+
+                Console.WriteLine($"response at {currentTime.Hour}:{currentTime.Minute}:{currentTime.Second}:{currentTime.Millisecond} - {response.Message}");
+            }
+
+            DateTime endTime = DateTime.UtcNow;
+
+            // Assert
+            Assert.IsTrue(responsesWithTimestamps.Count > 1, "Should receive multiple response parts");
+
+            // Calculate total time from first response to last response, and average time between responses
+            TimeSpan totalDuration = responsesWithTimestamps.Count > 1
+                ? responsesWithTimestamps.Last().Timestamp - responsesWithTimestamps.First().Timestamp
+                : TimeSpan.Zero;
+
+            List<TimeSpan> gapsBetweenResponses = new List<TimeSpan>();
+            for (int i = 1; i < responsesWithTimestamps.Count; i++)
+            {
+                TimeSpan gap = responsesWithTimestamps[i].Timestamp - responsesWithTimestamps[i - 1].Timestamp;
+                gapsBetweenResponses.Add(gap);
+            }
+
+            Assert.IsTrue(gapsBetweenResponses.Count > 1);
+            double averageGapMs = gapsBetweenResponses.Average(gap => gap.TotalMilliseconds);
+
+            Console.WriteLine($"Total duration (first to last response): {totalDuration.TotalMilliseconds:F2}ms");
+            Console.WriteLine($"Average gap between responses: {averageGapMs:F2}ms");
+            Console.WriteLine($"Number of responses: {responsesWithTimestamps.Count}");
+
+            // Verify that streaming actually took time (not all responses arrived simultaneously)
+            Assert.IsTrue(totalDuration.TotalMilliseconds > 500,
+                $"Streaming should take more than 500ms from first to last response, but took only {totalDuration.TotalMilliseconds:F2}ms. " +
+                $"This indicates responses are not actually streaming over time.");
+        }
+
+        [TestMethod]
         public async Task StreamChatAsync_InvalidModel_ThrowsException()
         {
             // Arrange

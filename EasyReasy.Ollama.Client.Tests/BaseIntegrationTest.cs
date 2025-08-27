@@ -12,7 +12,7 @@ namespace EasyReasy.Ollama.Client.Tests
         protected static HttpClient ServerClient = null!;
         protected OllamaClient? Client;
 
-        protected const string chatTestModelName = "gemma3:1b";
+        protected const string chatTestModelName = "llama3.1";
         protected const string embeddingModelName = "nomic-embed-text";
 
         [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
@@ -58,6 +58,7 @@ namespace EasyReasy.Ollama.Client.Tests
             {
                 throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
             }
+
             return await OllamaClient.CreateAuthorizedAsync(ServerClient, "test-api-key");
         }
 
@@ -71,6 +72,7 @@ namespace EasyReasy.Ollama.Client.Tests
             {
                 throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
             }
+
             return OllamaClient.CreateUnauthorized(ServerClient, "test-api-key");
         }
 
@@ -84,6 +86,7 @@ namespace EasyReasy.Ollama.Client.Tests
             {
                 throw new InvalidOperationException("ServerClient is null. ClassInitialize may not have been called properly.");
             }
+
             return OllamaClient.CreateUnauthorized(ServerClient, "invalid-api-key");
         }
     }

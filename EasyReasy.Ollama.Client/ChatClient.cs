@@ -1,5 +1,6 @@
 using EasyReasy.Ollama.Common;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace EasyReasy.Ollama.Client
 {
@@ -77,9 +78,14 @@ namespace EasyReasy.Ollama.Client
             await _mainClient.EnsureAuthorizedForSpecializedClientsAsync(cancellationToken);
 
             string json = request.ToJson();
-            StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync("api/chat/stream", content, cancellationToken);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/chat/stream")
+            {
+                Content = content
+            };
+
+            HttpResponseMessage response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -96,51 +102,71 @@ namespace EasyReasy.Ollama.Client
             }
 
             Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using StreamReader reader = new StreamReader(stream);
 
-            string? line;
-            while ((line = await reader.ReadLineAsync()) != null)
+            byte[] buffer = new byte[4096];
+            StringBuilder lineBuilder = new StringBuilder();
+
+            while (!cancellationToken.IsCancellationRequested)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                if (bytesRead == 0)
+                    break; // End of stream
 
-                if (line.StartsWith("data: "))
+                string chunk = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                for (int i = 0; i < chunk.Length; i++)
                 {
-                    string data = line.Substring(6);
+                    char c = chunk[i];
 
-                    if (string.IsNullOrEmpty(data))
-                        continue;
+                    if (c == '\n')
+                    {
+                        // Process complete line
+                        string line = lineBuilder.ToString().TrimEnd('\r');
+                        lineBuilder.Clear();
 
-                    ChatResponsePart? responsePart = null;
-                    Exception? parseException = null;
-
-                    try
-                    {
-                        responsePart = ChatResponsePart.FromJson(data);
-                    }
-                    catch (Exception exception)
-                    {
-                        parseException = exception;
-                    }
-
-                    if (responsePart != null)
-                    {
-                        yield return responsePart;
-                    }
-                    else if (parseException != null)
-                    {
-                        // Try to parse as ExceptionResponse
-                        try
+                        if (line.StartsWith("data: "))
                         {
-                            ExceptionResponse exceptionResponse = ExceptionResponse.FromJson(data);
-                            Exception recreatedException = exceptionResponse.RecreateException();
-                            throw recreatedException;
+                            string data = line.Substring(6);
+
+                            if (string.IsNullOrEmpty(data))
+                                continue;
+
+                            ChatResponsePart? responsePart = null;
+                            Exception? parseException = null;
+
+                            try
+                            {
+                                responsePart = ChatResponsePart.FromJson(data);
+                            }
+                            catch (Exception exception)
+                            {
+                                parseException = exception;
+                            }
+
+                            if (responsePart != null)
+                            {
+                                yield return responsePart;
+                            }
+                            else if (parseException != null)
+                            {
+                                // Try to parse as ExceptionResponse
+                                try
+                                {
+                                    ExceptionResponse exceptionResponse = ExceptionResponse.FromJson(data);
+                                    Exception recreatedException = exceptionResponse.RecreateException();
+                                    throw recreatedException;
+                                }
+                                catch
+                                {
+                                    // If it's not an ExceptionResponse, rethrow the original exception
+                                    throw parseException;
+                                }
+                            }
                         }
-                        catch
-                        {
-                            // If it's not an ExceptionResponse, rethrow the original exception
-                            throw parseException;
-                        }
+                    }
+                    else
+                    {
+                        lineBuilder.Append(c);
                     }
                 }
             }
