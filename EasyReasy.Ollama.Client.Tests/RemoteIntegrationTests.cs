@@ -1,5 +1,5 @@
-﻿using EasyReasy.Ollama.Common;
-using EasyReasy.EnvironmentVariables;
+﻿using EasyReasy.EnvironmentVariables;
+using EasyReasy.Ollama.Common;
 
 namespace EasyReasy.Ollama.Client.Tests
 {

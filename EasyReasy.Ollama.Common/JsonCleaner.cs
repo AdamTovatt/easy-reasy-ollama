@@ -43,7 +43,7 @@ namespace EasyReasy.Ollama.Common
 
             // Extract the JSON part starting from the first '{'
             string jsonPart = json.Substring(startIndex);
-            
+
             // Try to parse with Utf8JsonReader first (for complete JSON)
             try
             {
@@ -132,7 +132,7 @@ namespace EasyReasy.Ollama.Common
         {
             // Simple approach: just add missing quotes and braces
             string result = json;
-            
+
             // If the string ends with a quote, it's incomplete
             if (result.EndsWith("\""))
             {
@@ -155,7 +155,7 @@ namespace EasyReasy.Ollama.Common
                         escaped = false;
                     }
                 }
-                
+
                 // If we found a quote and it's not at the end, we need to close the string
                 if (lastQuoteIndex != -1 && lastQuoteIndex < result.Length - 1)
                 {
@@ -182,7 +182,7 @@ namespace EasyReasy.Ollama.Common
                     }
                 }
             }
-            
+
             // Check if we have an incomplete string that ends with a brace
             if (result.EndsWith("}") && !result.EndsWith("\"}"))
             {
@@ -199,35 +199,35 @@ namespace EasyReasy.Ollama.Common
                     }
                 }
             }
-            
+
             // Count braces and add missing ones
             int openBraces = 0;
             int closeBraces = 0;
             bool inString = false;
             bool escaped2 = false;
-            
+
             for (int i = 0; i < result.Length; i++)
             {
                 char c = result[i];
-                
+
                 if (escaped2)
                 {
                     escaped2 = false;
                     continue;
                 }
-                
+
                 if (c == '\\')
                 {
                     escaped2 = true;
                     continue;
                 }
-                
+
                 if (c == '"')
                 {
                     inString = !inString;
                     continue;
                 }
-                
+
                 if (!inString)
                 {
                     if (c == '{')
@@ -236,13 +236,13 @@ namespace EasyReasy.Ollama.Common
                         closeBraces++;
                 }
             }
-            
+
             // Add missing closing braces
             for (int i = 0; i < openBraces - closeBraces; i++)
             {
                 result += "}";
             }
-            
+
             return ReplaceFieldNames(result);
         }
 
