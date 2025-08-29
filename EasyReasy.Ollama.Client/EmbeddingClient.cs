@@ -47,20 +47,43 @@ namespace EasyReasy.Ollama.Client
             string json = request.ToJson();
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync("api/embeddings", content, cancellationToken);
+            HttpResponseMessage response;
+            bool retried = false;
 
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            while (true)
             {
-                // Token might be expired, but we can't easily retry from here
-                // The main client should handle authorization before calling this
-                string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Authentication failed. Status: {response.StatusCode}, Content: {errorContent}");
-            }
+                response = await _httpClient.PostAsync("api/embeddings", content, cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                throw new HttpRequestException($"Failed to get embeddings. Status: {response.StatusCode}, Content: {errorContent}");
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && !retried)
+                {
+                    // Token might be expired, force refresh and retry once
+                    retried = true;
+                    
+                    // Dispose the failed response
+                    response.Dispose();
+                    
+                    // Force authorization refresh
+                    await _mainClient.ForceAuthorizeAsync(cancellationToken);
+                    
+                    // Retry the request
+                    continue;
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && retried)
+                {
+                    // Already retried once, this is a real authentication failure
+                    string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new HttpRequestException($"Authentication failed after retry. Status: {response.StatusCode}, Content: {errorContent}");
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new HttpRequestException($"Failed to get embeddings. Status: {response.StatusCode}, Content: {errorContent}");
+                }
+
+                // Success, break out of retry loop
+                break;
             }
 
             string responseJson = await response.Content.ReadAsStringAsync(cancellationToken);

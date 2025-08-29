@@ -8,16 +8,17 @@ A .NET client library for interacting with the EasyReasy.Ollama.Server API. This
 
 EasyReasy.Ollama.Client provides a comprehensive .NET client for the EasyReasy.Ollama.Server API, featuring:
 
-- **🔐 Automatic Authentication**: JWT token management with API key authentication
+- **🔐 Automatic Authentication**: JWT token management with API key authentication and proactive token validation with retry on expiration
 - **💬 Chat Completions**: Streaming chat responses with support for tools and functions
 - **📊 Embeddings**: Text embedding generation
 - **🤖 Model Management**: Check available models and model availability
 - **🔄 Streaming Support**: Real-time streaming responses using Server-Sent Events
 - **🛡️ Error Handling**: Comprehensive error handling with exception recreation
+- **🔄 Authentication Retry**: Proactive token validation with retry on 401 responses
 
 ## Features
 
-- **Authentication**: Automatic JWT token management with API key authentication
+- **Authentication**: Automatic JWT token management with API key authentication and proactive token validation with retry logic
 - **Chat Streaming**: Real-time streaming chat completions with SSE
 - **Function Calling**: Support for Ollama tool/function definitions and calls
 - **Embeddings**: Text embedding generation with any supported model
@@ -25,6 +26,7 @@ EasyReasy.Ollama.Client provides a comprehensive .NET client for the EasyReasy.O
 - **Type Safety**: Full type safety with the Common library models
 - **Error Handling**: Serializable exception responses with recreation
 - **Cancellation Support**: Full cancellation token support throughout
+- **Authentication Retry**: Proactive token validation with retry on 401 responses
 
 ## Quick Start
 
@@ -368,7 +370,7 @@ try
 }
 catch (UnauthorizedAccessException)
 {
-    // Handle authentication errors
+    // Handle authentication errors (note: 401 errors are automatically retried once)
 }
 catch (HttpRequestException ex)
 {
@@ -379,6 +381,10 @@ catch (Exception ex)
     // Handle unexpected errors
 }
 ```
+
+### 6. Automatic Retry
+
+The client proactively validates tokens before each request and automatically handles token expiration by retrying requests once with a fresh token when validation fails. This means you don't need to implement your own retry logic for 401 responses.
 
 ## Integration
 
@@ -392,7 +398,7 @@ This client library works seamlessly with:
 
 The client provides comprehensive error handling:
 
-- **Authentication Errors**: `UnauthorizedAccessException` for invalid API keys
+- **Authentication Errors**: `UnauthorizedAccessException` for invalid API keys (with proactive token validation and retry on expiration)
 - **Network Errors**: `HttpRequestException` for connection issues
 - **Model Errors**: Clear error messages for unsupported models
 - **Serialization Errors**: Graceful handling of malformed responses
@@ -410,7 +416,7 @@ The client provides comprehensive error handling:
 - **JWT Authentication**: Automatic JWT token management
 - **API Key Security**: Secure API key handling
 - **HTTPS Support**: Full HTTPS support for secure communication
-- **Token Refresh**: Automatic token refresh on expiration
+- **Token Refresh**: Proactive token validation with automatic refresh and retry logic for unexpected 401 responses
 
 ---
 

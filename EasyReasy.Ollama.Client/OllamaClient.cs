@@ -43,6 +43,16 @@ namespace EasyReasy.Ollama.Client
         }
 
         /// <summary>
+        /// Forces authorization refresh, regardless of current token validity.
+        /// This method should be called by specialized clients when they receive 401 responses.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        internal async Task ForceAuthorizeAsync(CancellationToken cancellationToken = default)
+        {
+            await _authorizedHttpClient.ForceAuthorizeAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Creates an Ollama client using an API key without automatically authorizing.
         /// </summary>
         /// <param name="httpClient">The HTTP client to use for requests.</param>
